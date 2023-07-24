@@ -1,0 +1,633 @@
+openapi: 3.0.0
+info:
+  title: Chaos
+  version: '1.0.0'
+  description: Central Management API for managing deployments
+  contact:
+    email: support@qernal.com
+  x-logo:
+    url: /assets/components/chaos.png
+    backgroundColor: "#FFFFFF"
+    altText: Qernal Chaos
+servers:
+  - url: 'https://chaos.qernal.com'
+    description: Production
+paths:
+
+  # '/service/health':
+  #   get:
+  #     summary: System Health
+  #     tags:
+  #       - service
+  #     responses:
+  #       '200':
+  #         $ref: '#/components/responses/HealthCheck'
+  #     operationId: get-system-health
+  #     description: Get health of Chaos
+
+  '/organisations':
+    get:
+      parameters:
+        - $ref: '#/components/parameters/pagination_page'
+      summary: List organisations
+      tags:
+        - organisations
+      security:
+        - JWT: []
+      responses:
+        '200':
+          $ref: '#/components/responses/ListOrganisations'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      operationId: get-organisations
+      description: List organisations
+    post:
+      summary: Create organisations
+      operationId: post-organisations
+      responses:
+        '200':
+          $ref: '#/components/responses/Organisation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      description: Create an organisation
+      tags:
+        - organisations
+      security:
+        - JWT: []
+      requestBody:
+        $ref: '#/components/requestBodies/OrganisationBody'
+
+  '/organisations/{organisation_id}':
+    parameters:
+      - $ref: '#/components/parameters/organisation_id'
+    get:
+      summary: Get an organisation
+      tags:
+        - organisations
+      security:
+        - JWT: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Organisation'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      operationId: get-organisations-orgId
+      description: Get a single organisation
+    put:
+      summary: Update an organisation
+      operationId: put-organisations-orgId
+      responses:
+        '200':
+          $ref: '#/components/responses/Organisation'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      description: Update an organisation
+      tags:
+        - organisations
+      security:
+        - JWT: []
+      requestBody:
+        $ref: '#/components/requestBodies/OrganisationBody'
+    delete:
+      summary: Delete an organisation
+      operationId: delete-organisations-orgId
+      responses:
+        '200':
+          $ref: '#/components/responses/ResourceDeleted'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      description: Delete organisation, this will also delete all the resources within the organisation
+      tags:
+        - organisations
+      security:
+        - JWT: []
+
+  '/organisations/{organisation_id}/projects':
+    parameters:
+      - $ref: '#/components/parameters/organisation_id'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/pagination_page'
+      summary: Get all projects within an organisation
+      tags:
+        - projects
+      security:
+        - JWT: []
+      responses:
+        '200':
+          $ref: '#/components/responses/ListProjects'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      operationId: get-organisations-orgId-projects
+      description: Get all the projects linked to a specific organisation
+
+  '/projects':
+    get:
+      parameters:
+        - $ref: '#/components/parameters/pagination_page'
+      summary: List projects
+      tags:
+        - projects
+      security:
+        - JWT: []
+      responses:
+        '200':
+          $ref: '#/components/responses/ListProjects'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      operationId: get-projects
+      description: 'Get all projects for this user, paginated'
+    post:
+      summary: Create project
+      operationId: post-projects
+      responses:
+        '201':
+          $ref: '#/components/responses/Project'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      description: Create a new project
+      requestBody:
+        $ref: '#/components/requestBodies/ProjectBody'
+      tags:
+        - projects
+      security:
+        - JWT: []
+        
+  '/projects/{project_id}':
+    parameters:
+      - $ref: '#/components/parameters/project_id'
+    get:
+      summary: Get project
+      tags:
+        - projects
+      security:
+        - JWT: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Project'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      operationId: get-projects-projectId
+      description: Get a specific project
+    put:
+      summary: Update project
+      operationId: put-projects-projectId
+      responses:
+        '200':
+          $ref: '#/components/responses/Project'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      description: Update project
+      requestBody:
+        $ref: '#/components/requestBodies/ProjectBody'
+      tags:
+        - projects
+      security:
+        - JWT: []
+    delete:
+      summary: Delete project
+      operationId: delete-projects-projectId
+      responses:
+        '200':
+          $ref: '#/components/responses/ResourceDeleted'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '403':
+          $ref: '#/components/responses/Unauthorised'
+      description: Delete project, this will also delete all the resources within the project
+      tags:
+        - projects
+      security:
+        - JWT: []
+    
+#   /providers:
+#     get:
+#       summary: Get available providers
+#       tags:
+#         - providers
+#       responses:
+#         '200':
+#           $ref: '#/components/responses/GetProvidersSuccessResponse'
+#       operationId: get-providers
+#       description: Retrieve a list of all providers with their respective deployed regions and cities.
+#       security:
+#         - JWT: []
+
+components:
+  # schemas
+  schemas:
+    NotFoundResponse:
+      description: 'Resource not found'
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    UnauthorisedResponse:
+      description: 'Unauthorised'
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    BadRequestResponse:
+      description: 'Bad request'
+      type: object
+      properties:
+        message:
+          type: string
+        fields:
+          type: object
+          properties:
+            email:
+              type: string
+      required:
+        - message
+        - fields
+    ConflictResponse:
+      description: 'Conflict Response'
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    DeletedResponse:
+      description: 'Deleted Response'
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    PaginationMeta:
+      description: Meta object for pagination use
+      type: object
+      properties:
+        results:
+          type: number
+        start:
+          type: number
+        end:
+          type: number
+        pages:
+          type: number
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+      required:
+        - results
+        - start
+        - end
+        - pages
+        - links
+    PaginationLinks:
+      description: Links object for pagination use
+      type: object
+      properties:
+        prev:
+          type: string
+          minLength: 1
+        next:
+          type: string
+          minLength: 1
+      required:
+        - prev
+        - next
+    OrganisationResponse:
+      description: Organisation response
+      type: object
+      properties:
+        id:
+          type: string
+          description: Organisation id
+          minLength: 1
+        user_id:
+          type: string
+          description: User id
+          minLength: 1
+        name:
+          type: string
+          description: Organisation name
+          minLength: 1
+      required:
+        - id
+        - user_id
+        - name
+    ListOrganisationResponse:
+      description: List organisations schema
+      type: object
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+          links:
+            $ref: '#/components/schemas/PaginationLinks'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganisationResponse'
+    OrganisationBody:
+      description: Organisation body
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Organisation name
+      required:
+        - name
+
+    ListProjectResponse:
+      type: object
+      description: 'List of projects'
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+          links:
+            $ref: '#/components/schemas/PaginationLinks'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectResponse'
+      required:
+        - meta
+        - data
+    ProjectResponse:
+      description: Project response
+      type: object
+      properties:
+        id:
+          type: string
+          description: Project id
+          format: uuid
+          minLength: 1
+        org_id:
+          type: string
+          description: Organisation id
+          format: uuid
+          minLength: 1
+        name:
+          type: string
+          description: Project name
+          minLength: 1
+      required:
+        - id
+        - org_id
+        - name
+    ProjectBody:
+      description: Project body
+      type: object
+      properties:
+        org_id:
+          type: string
+          minLength: 1
+          description: Organisation id
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          description: Project name
+      required:
+        - org_id
+        - name
+
+  # responses
+  responses:
+    NoContent:
+      description: The resources were updated successfully
+    Unauthorised:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnauthorisedResponse'
+          examples:
+            generic-unauthorised-response:
+              value:
+                message: "Unauthorised"
+    ResourceNotFound:
+      description: Resource Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NotFoundResponse'
+          examples:
+            generic-not-found-response:
+              value:
+                message: "Resource not found"
+    ResourceConflict:
+      description: Resource Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConflictResponse'
+          examples:
+            generic-conflict-response:
+              value:
+                message: "Conflict, Resource already exists"
+    ResourceDeleted:
+      description: Resource deleted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeletedResponse'
+          examples:
+            generic-deleted-response:
+              value:
+                message: "Resource deleted"
+    BadRequest:
+      description: Resource Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BadRequestResponse'
+          examples:
+            user-bad-request-response:
+              value:
+                message: "Missing fields"
+                fields:
+                  email: Valid email required
+            project-bad-request-response:
+              value:
+                message: "Missing fields"
+                fields:
+                  org_id: Valid organisation required
+                  name: Valid name required
+            organisation-bad-request-response:
+              value:
+                message: "Missing fields"
+                fields:
+                  name: Name required
+
+    ListOrganisations:
+      description: List organisations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ListOrganisationResponse'
+          examples:
+            paginated-organisations:
+              value:
+                meta:
+                  results: 200
+                  start: 20
+                  end: 40
+                  pages: 20
+                  links:
+                    prev: '/{url}?page[before]=20&page[size]=20'
+                    next: '/{url}?page[after]=40&page[size]=20'
+                data:
+                  - id: "2443"
+                    user_id: "8796"
+                    name: "my org"
+                  - id: "2444"
+                    user_id: "2587"
+                    name: "api dev org"
+    Organisation:
+      description: Get organisation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrganisationResponse'
+          examples:
+            paginated-organisations:
+              value:
+                id: "2443"
+                user_id: "8796"
+                name: "my org"
+
+    ListProjects:
+      description: List projects
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ListProjectResponse'
+          examples:
+            paginated-projects:
+              value:
+                meta:
+                  results: 200
+                  start: 20
+                  end: 40
+                  pages: 20
+                  links:
+                    prev: '/{url}?page[before]=20&page[size]=20'
+                    next: '/{url}?page[after]=40&page[size]=20'
+                data:
+                  - id: "2443"
+                    org_id: "8796"
+                    name: "my project"
+                  - id: "2444"
+                    org_id: "8796"
+                    name: "first api"
+    Project:
+      description: Get project
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProjectResponse'
+          examples:
+            project:
+              value:
+                id: "2443"
+                org_id: "8796"
+                name: "first api"
+
+  # request bodies
+  requestBodies:
+    OrganisationBody:
+      description: Create/Update any field
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrganisationBody'
+          examples:
+            organisation-create:
+              value:
+                name: API Dev
+    ProjectBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProjectBody'
+          examples:
+            project-create:
+              value:
+                org_id: "8796"
+                name: first api
+      description: Create/Update any field
+      
+  # parameters
+  parameters:
+    pagination_page:
+      in: query
+      name: page
+      schema:
+        type: object
+        properties:
+          before:
+            type: integer
+            example: 20
+            description: Offset
+          after:
+            type: integer
+            example: 20
+            description: Offset
+          size:
+            type: integer
+            example: 20
+            description: Limit
+      style: deepObject
+      explode: true
+      description: Query parameters for pagination
+    organisation_id:
+      name: organisation_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Organisation ID reference
+    project_id:
+      name: project_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Project ID reference
+    
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+
+# tags
+tags:
+  - name: projects
+    description: Project operations, projects belong to an organisation
+  - name: organisations
+    description: Organisations are a hierarchy top-level for a user, they allow for organising of projects
