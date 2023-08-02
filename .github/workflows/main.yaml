@@ -60,6 +60,14 @@ jobs:
     name: Deploy docs
     steps:
 
+      - name: Get commit details
+        run: |
+          export branch_name=${GITHUB_REF##*/}
+          echo "branch_name=${branch_name}" >> $GITHUB_ENV
+          echo "branch_name_upper=${branch_name^^}" >> $GITHUB_ENV
+          echo "branch_name_lower=${branch_name,,}" >> $GITHUB_ENV
+          echo "commit_sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
+
       - name: Download docs build
         uses: actions/download-artifact@v3
         with:
