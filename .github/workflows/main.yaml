@@ -1,0 +1,86 @@
+name: qernal-docs-build
+
+# TODO: build on tag and publish versioned docs
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # validate docs
+  lint:
+    name: Validate docs
+    runs-on: ubuntu-22.04
+    steps:
+
+      - uses: actions/checkout@v3
+
+      # TODO: add linting step
+
+  # build docs
+  build:
+    name: Build docs
+    runs-on: ubuntu-22.04
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Get commit details
+        run: |
+          export branch_name=${GITHUB_REF##*/}
+          echo "branch_name=${branch_name}" >> $GITHUB_ENV
+          echo "branch_name_upper=${branch_name^^}" >> $GITHUB_ENV
+          echo "branch_name_lower=${branch_name,,}" >> $GITHUB_ENV
+          echo "commit_sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          architecture: 'x64'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Compile docs
+        run: |
+          mkdocs build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: docs
+          path: ./build/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-22.04
+    name: Deploy docs
+    steps:
+
+      - name: Download docs build
+        uses: actions/download-artifact@v3
+        with:
+          name: docs
+          path: ./output/
+
+      - name: Build container
+        shell: bash
+        run: |
+          # switch to multiarchitecture docker files
+          docker build -t ghcr.io/qernal/public-docs:${{ env.branch_name_lower }}-x86-64 -f ./.github/build/Dockerfile ./output
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push builds
+        shell: bash
+        run: |
+          # push builds
+          docker push ghcr.io/qernal/public-docs:${{ env.branch_name_lower }}-x86-64
