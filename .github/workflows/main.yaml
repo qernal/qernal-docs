@@ -48,32 +48,6 @@ jobs:
         run: |
           mkdocs build
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: docs
-          path: ./build/
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-22.04
-    name: Deploy docs
-    steps:
-
-      - name: Get commit details
-        run: |
-          export branch_name=${GITHUB_REF##*/}
-          echo "branch_name=${branch_name}" >> $GITHUB_ENV
-          echo "branch_name_upper=${branch_name^^}" >> $GITHUB_ENV
-          echo "branch_name_lower=${branch_name,,}" >> $GITHUB_ENV
-          echo "commit_sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
-
-      - name: Download docs build
-        uses: actions/download-artifact@v3
-        with:
-          name: docs
-          path: ./output/
-
       - name: Build container
         shell: bash
         run: |
@@ -92,3 +66,18 @@ jobs:
         run: |
           # push builds
           docker push ghcr.io/qernal/public-docs:${{ env.branch_name_lower }}-x86-64
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-22.04
+    name: Deploy docs
+    if: github.ref == 'refs/heads/main'
+    steps:
+
+      - name: Get commit details
+        run: |
+          export branch_name=${GITHUB_REF##*/}
+          echo "branch_name=${branch_name}" >> $GITHUB_ENV
+          echo "branch_name_upper=${branch_name^^}" >> $GITHUB_ENV
+          echo "branch_name_lower=${branch_name,,}" >> $GITHUB_ENV
+          echo "commit_sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
