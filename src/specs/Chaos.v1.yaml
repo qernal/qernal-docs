@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Chaos
   version: '1.0.0'
-  description: Central Management API for managing deployments
+  description: Central Management API - publicly exposed set of APIs for managing deployments
   contact:
     email: support@qernal.com
   x-logo:
@@ -10,7 +10,7 @@ info:
     backgroundColor: "#FFFFFF"
     altText: Qernal Chaos
 servers:
-  - url: 'https://chaos.qernal.com'
+  - url: 'https://chaos.qernal.com/v1'
     description: Production
 paths:
 
@@ -168,7 +168,7 @@ paths:
         - projects
       security:
         - JWT: []
-        
+
   '/projects/{project_id}':
     parameters:
       - $ref: '#/components/parameters/project_id'
@@ -221,7 +221,7 @@ paths:
         - projects
       security:
         - JWT: []
-    
+
 #   /providers:
 #     get:
 #       summary: Get available providers
@@ -579,7 +579,7 @@ components:
                 org_id: "8796"
                 name: first api
       description: Create/Update any field
-      
+
   # parameters
   parameters:
     pagination_page:
@@ -610,6 +610,7 @@ components:
       schema:
         type: string
         format: uuid
+        example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
       description: Organisation ID reference
     project_id:
       name: project_id
@@ -618,8 +619,9 @@ components:
       schema:
         type: string
         format: uuid
+        example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
       description: Project ID reference
-    
+
   securitySchemes:
     JWT:
       type: http
