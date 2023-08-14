@@ -12,6 +12,10 @@ info:
 servers:
   - url: 'https://chaos.qernal.com/v1'
     description: Production
+security:
+  - token: []
+  - cookie: []
+
 paths:
 
   # '/service/health':
@@ -33,7 +37,8 @@ paths:
       tags:
         - organisations
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
       responses:
         '200':
           $ref: '#/components/responses/ListOrganisations'
@@ -55,7 +60,8 @@ paths:
       tags:
         - organisations
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
       requestBody:
         $ref: '#/components/requestBodies/OrganisationBody'
 
@@ -67,7 +73,8 @@ paths:
       tags:
         - organisations
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
       responses:
         '200':
           $ref: '#/components/responses/Organisation'
@@ -93,7 +100,8 @@ paths:
       tags:
         - organisations
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
       requestBody:
         $ref: '#/components/requestBodies/OrganisationBody'
     delete:
@@ -110,7 +118,8 @@ paths:
       tags:
         - organisations
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
 
   '/organisations/{organisation_id}/projects':
     parameters:
@@ -122,7 +131,8 @@ paths:
       tags:
         - projects
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
       responses:
         '200':
           $ref: '#/components/responses/ListProjects'
@@ -141,7 +151,8 @@ paths:
       tags:
         - projects
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
       responses:
         '200':
           $ref: '#/components/responses/ListProjects'
@@ -167,7 +178,8 @@ paths:
       tags:
         - projects
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
 
   '/projects/{project_id}':
     parameters:
@@ -177,7 +189,8 @@ paths:
       tags:
         - projects
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
       responses:
         '200':
           $ref: '#/components/responses/Project'
@@ -205,7 +218,8 @@ paths:
       tags:
         - projects
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
     delete:
       summary: Delete project
       operationId: delete-projects-projectId
@@ -220,7 +234,8 @@ paths:
       tags:
         - projects
       security:
-        - JWT: []
+        - token: []
+        - cookie: []
 
 #   /providers:
 #     get:
@@ -623,9 +638,14 @@ components:
       description: Project ID reference
 
   securitySchemes:
-    JWT:
-      type: http
-      scheme: bearer
+    token:
+      type: apiKey
+      in: header
+      name: "QERNAL-AUTH-TOKEN"
+    cookie:
+      type: apiKey
+      in: cookie
+      name: qernal_kratos_session
 
 # tags
 tags:
