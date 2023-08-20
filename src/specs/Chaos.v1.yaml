@@ -44,11 +44,11 @@ paths:
           $ref: '#/components/responses/ListOrganisations'
         '403':
           $ref: '#/components/responses/Unauthorised'
-      operationId: get-organisations
+      operationId: organisations-list
       description: List organisations
     post:
       summary: Create organisations
-      operationId: post-organisations
+      operationId: organisations-create
       responses:
         '200':
           $ref: '#/components/responses/Organisation'
@@ -82,11 +82,11 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '403':
           $ref: '#/components/responses/Unauthorised'
-      operationId: get-organisations-orgId
+      operationId: organisations-get
       description: Get a single organisation
     put:
       summary: Update an organisation
-      operationId: put-organisations-orgId
+      operationId: organisations-update
       responses:
         '200':
           $ref: '#/components/responses/Organisation'
@@ -106,7 +106,7 @@ paths:
         $ref: '#/components/requestBodies/OrganisationBody'
     delete:
       summary: Delete an organisation
-      operationId: delete-organisations-orgId
+      operationId: organisations-delete
       responses:
         '200':
           $ref: '#/components/responses/ResourceDeleted'
@@ -140,7 +140,7 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '403':
           $ref: '#/components/responses/Unauthorised'
-      operationId: get-organisations-orgId-projects
+      operationId: organisations-projects-list
       description: Get all the projects linked to a specific organisation
 
   '/projects':
@@ -158,11 +158,11 @@ paths:
           $ref: '#/components/responses/ListProjects'
         '403':
           $ref: '#/components/responses/Unauthorised'
-      operationId: get-projects
+      operationId: projects-list
       description: 'Get all projects for this user, paginated'
     post:
       summary: Create project
-      operationId: post-projects
+      operationId: projects-create
       responses:
         '201':
           $ref: '#/components/responses/Project'
@@ -198,11 +198,11 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '403':
           $ref: '#/components/responses/Unauthorised'
-      operationId: get-projects-projectId
+      operationId: projects-get
       description: Get a specific project
     put:
       summary: Update project
-      operationId: put-projects-projectId
+      operationId: projects-update
       responses:
         '200':
           $ref: '#/components/responses/Project'
@@ -214,7 +214,7 @@ paths:
           $ref: '#/components/responses/Unauthorised'
       description: Update project
       requestBody:
-        $ref: '#/components/requestBodies/ProjectBody'
+        $ref: '#/components/requestBodies/ProjectBodyPatch'
       tags:
         - projects
       security:
@@ -222,7 +222,7 @@ paths:
         - cookie: []
     delete:
       summary: Delete project
-      operationId: delete-projects-projectId
+      operationId: projects-delete
       responses:
         '200':
           $ref: '#/components/responses/ResourceDeleted'
@@ -304,13 +304,13 @@ components:
       type: object
       properties:
         results:
-          type: number
+          type: integer
         start:
-          type: number
+          type: integer
         end:
-          type: number
+          type: integer
         pages:
-          type: number
+          type: integer
         links:
           $ref: '#/components/schemas/PaginationLinks'
       required:
@@ -339,10 +339,12 @@ components:
         id:
           type: string
           description: Organisation id
+          format: uuid
           minLength: 1
         user_id:
           type: string
           description: User id
+          format: uuid
           minLength: 1
         name:
           type: string
@@ -364,6 +366,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrganisationResponse'
+      required:
+        - meta
+        - data
     OrganisationBody:
       description: Organisation body
       type: object
@@ -428,6 +433,20 @@ components:
       required:
         - org_id
         - name
+
+    ProjectBodyPatch:
+      description: Project patch fields
+      type: object
+      properties:
+        org_id:
+          type: string
+          minLength: 1
+          description: Organisation id
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          description: Project name
 
   # responses
   responses:
@@ -594,6 +613,13 @@ components:
                 org_id: "8796"
                 name: first api
       description: Create/Update any field
+
+    ProjectBodyPatch:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProjectBodyPatch'
+      description: Update any field
 
   # parameters
   parameters:
