@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Chaos
-  version: '1.0.0'
+  version: "1.0.0"
   description: Central Management API - publicly exposed set of APIs for managing deployments
   contact:
     email: support@qernal.com
@@ -10,14 +10,13 @@ info:
     backgroundColor: "#FFFFFF"
     altText: Qernal Chaos
 servers:
-  - url: 'https://chaos.qernal.com/v1'
+  - url: "https://chaos.qernal.com/v1"
     description: Production
 security:
   - token: []
   - cookie: []
 
 paths:
-
   # '/service/health':
   #   get:
   #     summary: System Health
@@ -29,10 +28,10 @@ paths:
   #     operationId: get-system-health
   #     description: Get health of Chaos
 
-  '/organisations':
+  "/organisations":
     get:
       parameters:
-        - $ref: '#/components/parameters/pagination_page'
+        - $ref: "#/components/parameters/pagination_page"
       summary: List organisations
       tags:
         - organisations
@@ -40,22 +39,22 @@ paths:
         - token: []
         - cookie: []
       responses:
-        '200':
-          $ref: '#/components/responses/ListOrganisations'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "200":
+          $ref: "#/components/responses/ListOrganisations"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       operationId: organisations-list
       description: List organisations
     post:
       summary: Create organisations
       operationId: organisations-create
       responses:
-        '200':
-          $ref: '#/components/responses/Organisation'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "201":
+          $ref: "#/components/responses/Organisation"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       description: Create an organisation
       tags:
         - organisations
@@ -63,11 +62,11 @@ paths:
         - token: []
         - cookie: []
       requestBody:
-        $ref: '#/components/requestBodies/OrganisationBody'
+        $ref: "#/components/requestBodies/OrganisationBody"
 
-  '/organisations/{organisation_id}':
+  "/organisations/{organisation_id}":
     parameters:
-      - $ref: '#/components/parameters/organisation_id'
+      - $ref: "#/components/parameters/organisation_id"
     get:
       summary: Get an organisation
       tags:
@@ -76,26 +75,26 @@ paths:
         - token: []
         - cookie: []
       responses:
-        '200':
-          $ref: '#/components/responses/Organisation'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "200":
+          $ref: "#/components/responses/Organisation"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       operationId: organisations-get
       description: Get a single organisation
     put:
       summary: Update an organisation
       operationId: organisations-update
       responses:
-        '200':
-          $ref: '#/components/responses/Organisation'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "200":
+          $ref: "#/components/responses/Organisation"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       description: Update an organisation
       tags:
         - organisations
@@ -103,17 +102,17 @@ paths:
         - token: []
         - cookie: []
       requestBody:
-        $ref: '#/components/requestBodies/OrganisationBody'
+        $ref: "#/components/requestBodies/OrganisationBody"
     delete:
       summary: Delete an organisation
       operationId: organisations-delete
       responses:
-        '200':
-          $ref: '#/components/responses/ResourceDeleted'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "200":
+          $ref: "#/components/responses/ResourceDeleted"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       description: Delete organisation, this will also delete all the resources within the organisation
       tags:
         - organisations
@@ -121,12 +120,12 @@ paths:
         - token: []
         - cookie: []
 
-  '/organisations/{organisation_id}/projects':
+  "/organisations/{organisation_id}/projects":
     parameters:
-      - $ref: '#/components/parameters/organisation_id'
+      - $ref: "#/components/parameters/organisation_id"
     get:
       parameters:
-        - $ref: '#/components/parameters/pagination_page'
+        - $ref: "#/components/parameters/pagination_page"
       summary: Get all projects within an organisation
       tags:
         - projects
@@ -134,19 +133,19 @@ paths:
         - token: []
         - cookie: []
       responses:
-        '200':
-          $ref: '#/components/responses/ListProjects'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "200":
+          $ref: "#/components/responses/ListProjects"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       operationId: organisations-projects-list
       description: Get all the projects linked to a specific organisation
 
-  '/projects':
+  "/projects":
     get:
       parameters:
-        - $ref: '#/components/parameters/pagination_page'
+        - $ref: "#/components/parameters/pagination_page"
       summary: List projects
       tags:
         - projects
@@ -154,36 +153,36 @@ paths:
         - token: []
         - cookie: []
       responses:
-        '200':
-          $ref: '#/components/responses/ListProjects'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "200":
+          $ref: "#/components/responses/ListProjects"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       operationId: projects-list
-      description: 'Get all projects for this user, paginated'
+      description: "Get all projects for this user, paginated"
     post:
       summary: Create project
       operationId: projects-create
       responses:
-        '201':
-          $ref: '#/components/responses/Project'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "201":
+          $ref: "#/components/responses/Project"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       description: Create a new project
       requestBody:
-        $ref: '#/components/requestBodies/ProjectBody'
+        $ref: "#/components/requestBodies/ProjectBody"
       tags:
         - projects
       security:
         - token: []
         - cookie: []
 
-  '/projects/{project_id}':
+  "/projects/{project_id}":
     parameters:
-      - $ref: '#/components/parameters/project_id'
+      - $ref: "#/components/parameters/project_id"
     get:
       summary: Get project
       tags:
@@ -192,29 +191,29 @@ paths:
         - token: []
         - cookie: []
       responses:
-        '200':
-          $ref: '#/components/responses/Project'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "200":
+          $ref: "#/components/responses/Project"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       operationId: projects-get
       description: Get a specific project
     put:
       summary: Update project
       operationId: projects-update
       responses:
-        '200':
-          $ref: '#/components/responses/Project'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "200":
+          $ref: "#/components/responses/Project"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       description: Update project
       requestBody:
-        $ref: '#/components/requestBodies/ProjectBodyPatch'
+        $ref: "#/components/requestBodies/ProjectBodyPatch"
       tags:
         - projects
       security:
@@ -224,12 +223,12 @@ paths:
       summary: Delete project
       operationId: projects-delete
       responses:
-        '200':
-          $ref: '#/components/responses/ResourceDeleted'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '403':
-          $ref: '#/components/responses/Unauthorised'
+        "200":
+          $ref: "#/components/responses/ResourceDeleted"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
       description: Delete project, this will also delete all the resources within the project
       tags:
         - projects
@@ -254,7 +253,7 @@ components:
   # schemas
   schemas:
     NotFoundResponse:
-      description: 'Resource not found'
+      description: "Resource not found"
       type: object
       properties:
         message:
@@ -262,7 +261,7 @@ components:
       required:
         - message
     UnauthorisedResponse:
-      description: 'Unauthorised'
+      description: "Unauthorised"
       type: object
       properties:
         message:
@@ -270,7 +269,7 @@ components:
       required:
         - message
     BadRequestResponse:
-      description: 'Bad request'
+      description: "Bad request"
       type: object
       properties:
         message:
@@ -284,7 +283,7 @@ components:
         - message
         - fields
     ConflictResponse:
-      description: 'Conflict Response'
+      description: "Conflict Response"
       type: object
       properties:
         message:
@@ -292,7 +291,7 @@ components:
       required:
         - message
     DeletedResponse:
-      description: 'Deleted Response'
+      description: "Deleted Response"
       type: object
       properties:
         message:
@@ -312,7 +311,7 @@ components:
         pages:
           type: integer
         links:
-          $ref: '#/components/schemas/PaginationLinks'
+          $ref: "#/components/schemas/PaginationLinks"
       required:
         - results
         - start
@@ -359,13 +358,13 @@ components:
       type: object
       properties:
         meta:
-          $ref: '#/components/schemas/PaginationMeta'
+          $ref: "#/components/schemas/PaginationMeta"
           links:
-            $ref: '#/components/schemas/PaginationLinks'
+            $ref: "#/components/schemas/PaginationLinks"
         data:
           type: array
           items:
-            $ref: '#/components/schemas/OrganisationResponse'
+            $ref: "#/components/schemas/OrganisationResponse"
       required:
         - meta
         - data
@@ -382,16 +381,16 @@ components:
 
     ListProjectResponse:
       type: object
-      description: 'List of projects'
+      description: "List of projects"
       properties:
         meta:
-          $ref: '#/components/schemas/PaginationMeta'
+          $ref: "#/components/schemas/PaginationMeta"
           links:
-            $ref: '#/components/schemas/PaginationLinks'
+            $ref: "#/components/schemas/PaginationLinks"
         data:
           type: array
           items:
-            $ref: '#/components/schemas/ProjectResponse'
+            $ref: "#/components/schemas/ProjectResponse"
       required:
         - meta
         - data
@@ -457,7 +456,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UnauthorisedResponse'
+            $ref: "#/components/schemas/UnauthorisedResponse"
           examples:
             generic-unauthorised-response:
               value:
@@ -467,7 +466,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/NotFoundResponse'
+            $ref: "#/components/schemas/NotFoundResponse"
           examples:
             generic-not-found-response:
               value:
@@ -477,7 +476,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ConflictResponse'
+            $ref: "#/components/schemas/ConflictResponse"
           examples:
             generic-conflict-response:
               value:
@@ -487,7 +486,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/DeletedResponse'
+            $ref: "#/components/schemas/DeletedResponse"
           examples:
             generic-deleted-response:
               value:
@@ -497,7 +496,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/BadRequestResponse'
+            $ref: "#/components/schemas/BadRequestResponse"
           examples:
             user-bad-request-response:
               value:
@@ -515,13 +514,12 @@ components:
                 message: "Missing fields"
                 fields:
                   name: Name required
-
     ListOrganisations:
       description: List organisations
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ListOrganisationResponse'
+            $ref: "#/components/schemas/ListOrganisationResponse"
           examples:
             paginated-organisations:
               value:
@@ -531,8 +529,8 @@ components:
                   end: 40
                   pages: 20
                   links:
-                    prev: '/{url}?page[before]=20&page[size]=20'
-                    next: '/{url}?page[after]=40&page[size]=20'
+                    prev: "/{url}?page[before]=20&page[size]=20"
+                    next: "/{url}?page[after]=40&page[size]=20"
                 data:
                   - id: "2443"
                     user_id: "8796"
@@ -545,7 +543,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/OrganisationResponse'
+            $ref: "#/components/schemas/OrganisationResponse"
           examples:
             paginated-organisations:
               value:
@@ -558,7 +556,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ListProjectResponse'
+            $ref: "#/components/schemas/ListProjectResponse"
           examples:
             paginated-projects:
               value:
@@ -568,8 +566,8 @@ components:
                   end: 40
                   pages: 20
                   links:
-                    prev: '/{url}?page[before]=20&page[size]=20'
-                    next: '/{url}?page[after]=40&page[size]=20'
+                    prev: "/{url}?page[before]=20&page[size]=20"
+                    next: "/{url}?page[after]=40&page[size]=20"
                 data:
                   - id: "2443"
                     org_id: "8796"
@@ -582,7 +580,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ProjectResponse'
+            $ref: "#/components/schemas/ProjectResponse"
           examples:
             project:
               value:
@@ -597,7 +595,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/OrganisationBody'
+            $ref: "#/components/schemas/OrganisationBody"
           examples:
             organisation-create:
               value:
@@ -606,20 +604,19 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ProjectBody'
+            $ref: "#/components/schemas/ProjectBody"
           examples:
             project-create:
               value:
-                org_id: "8796"
+                org_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
                 name: first api
       description: Create/Update any field
-
     ProjectBodyPatch:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ProjectBodyPatch'
-      description: Update any field
+       content:
+         application/json:
+           schema:
+             $ref: "#/components/schemas/ProjectBodyPatch"
+       description: Update any field
 
   # parameters
   parameters:
