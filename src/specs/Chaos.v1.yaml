@@ -27,7 +27,7 @@ paths:
   #         $ref: '#/components/responses/HealthCheck'
   #     operationId: get-system-health
   #     description: Get health of Chaos
-
+  # organisations
   "/organisations":
     get:
       parameters:
@@ -55,6 +55,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "403":
           $ref: "#/components/responses/Unauthorised"
+        "409":
+          $ref: "#/components/responses/ResourceConflict"
       description: Create an organisation
       tags:
         - organisations
@@ -141,7 +143,7 @@ paths:
           $ref: "#/components/responses/Unauthorised"
       operationId: organisations-projects-list
       description: Get all the projects linked to a specific organisation
-
+  # projects
   "/projects":
     get:
       parameters:
@@ -171,6 +173,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "403":
           $ref: "#/components/responses/Unauthorised"
+        "409":
+          $ref: "#/components/responses/ResourceConflict"
       description: Create a new project
       requestBody:
         $ref: "#/components/requestBodies/ProjectBody"
@@ -235,6 +239,152 @@ paths:
       security:
         - token: []
         - cookie: []
+  # secrets
+  "/projects/{project_id}/secrets":
+    parameters:
+      - $ref: "#/components/parameters/project_id"
+    get:
+      parameters:
+        - $ref: "#/components/parameters/pagination_page"
+        - $ref: "#/components/parameters/secret_type"
+      summary: List project secrets of a specific type
+      tags:
+        - secrets
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ListSecrets"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+      operationId: projects-secrets-list
+      description: List project secrets of a specific type
+    post:
+      summary: Create project secret
+      operationId: projects-secrets-create
+      responses:
+        "201":
+          $ref: "#/components/responses/Secret"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+        "409":
+          $ref: "#/components/responses/ResourceConflict"
+      description: Create a new project secret
+      requestBody:
+        $ref: "#/components/requestBodies/SecretBody"
+      tags:
+        - secrets
+      security:
+        - token: []
+        - cookie: []
+  "/projects/{project_id}/secrets/{secret_name}":
+    parameters:
+      - $ref: "#/components/parameters/project_id"
+      - $ref: "#/components/parameters/secret_name"
+    get:
+      summary: Get project secret
+      tags:
+        - secrets
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SecretMeta"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+      operationId: projects-secrets-get
+      description: Get a specific project
+    put:
+      summary: Update project secret
+      operationId: projects-secrets-update
+      responses:
+        "200":
+          $ref: "#/components/responses/Secret"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+      description: Update project
+      requestBody:
+        $ref: "#/components/requestBodies/SecretBodyPatch"
+      tags:
+        - secrets
+      security:
+        - token: []
+        - cookie: []
+    delete:
+      summary: Delete project secret
+      operationId: projects-secrets-delete
+      responses:
+        "200":
+          $ref: "#/components/responses/ResourceDeleted"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+      description: Delete project secret, if the secret is still linked to an active/deployed function - it cannot be removed
+      tags:
+        - secrets
+      security:
+        - token: []
+        - cookie: []
+  # "/projects/{project_id}/secrets/{secret_type}/{secret_id}/revisions":
+  #   parameters:
+  #     - $ref: "#/components/parameters/project_id"
+  #     - $ref: "#/components/parameters/secret_type"
+  #   get:
+  #     parameters:
+  #       - $ref: "#/components/parameters/pagination_page"
+  #     summary: List project secrets of a specific type
+  #     tags:
+  #       - secrets
+  #     security:
+  #       - token: []
+  #       - cookie: []
+  #     responses:
+  #       "200":
+  #         $ref: "#/components/responses/ListSecrets"
+  #       "404":
+  #         $ref: "#/components/responses/ResourceNotFound"
+  #       "403":
+  #         $ref: "#/components/responses/Unauthorised"
+  #     operationId: projects-secrets-list
+  #     description: List project secrets of a specific type
+  # "/projects/{project_id}/secrets/{secret_type}/{secret_id}/revisions/{revision_id}":
+  #   parameters:
+  #     - $ref: "#/components/parameters/project_id"
+  #     - $ref: "#/components/parameters/secret_type"
+  #   get:
+  #     parameters:
+  #       - $ref: "#/components/parameters/pagination_page"
+  #     summary: List project secrets of a specific type
+  #     tags:
+  #       - secrets
+  #     security:
+  #       - token: []
+  #       - cookie: []
+  #     responses:
+  #       "200":
+  #         $ref: "#/components/responses/Secret"
+  #       "404":
+  #         $ref: "#/components/responses/ResourceNotFound"
+  #       "403":
+  #         $ref: "#/components/responses/Unauthorised"
+  #     operationId: projects-secrets-revision-get
+  #     description: List project secrets of a specific type
+  # "/organisations/{organisation_id}/secrets":
 
 #   /providers:
 #     get:
@@ -304,12 +454,16 @@ components:
       properties:
         results:
           type: integer
+          example: 200
         start:
           type: integer
+          example: 20
         end:
           type: integer
+          example: 40
         pages:
           type: integer
+          example: 20
         links:
           $ref: "#/components/schemas/PaginationLinks"
       required:
@@ -325,9 +479,11 @@ components:
         prev:
           type: string
           minLength: 1
+          example: /{url}?page[before]=20&page[size]=20
         next:
           type: string
           minLength: 1
+          example: /{url}?page[after]=40&page[size]=20
       required:
         - prev
         - next
@@ -446,6 +602,291 @@ components:
           type: string
           minLength: 1
           description: Project name
+    # secrets
+    ListSecretResponse:
+      type: object
+      description: "List of secrets"
+      properties:
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+          links:
+            $ref: "#/components/schemas/PaginationLinks"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SecretMetaResponse"
+      required:
+        - meta
+        - data
+
+    SecretResponse:
+      description: Secret response
+      type: object
+      properties:
+        name:
+          type: string
+          description: Secret name
+          minLength: 1
+          pattern: "^[A-Z_]+$"
+        type:
+          $ref: "#/components/schemas/SecretCreateType"
+        payload:
+          oneOf:
+            - $ref: "#/components/schemas/SecretMetaResponseCertificatePayload"
+            - $ref: "#/components/schemas/SecretMetaResponseRegistryPayload"
+        revision:
+          type: integer
+          description: Secret revision
+          example: 32
+        date:
+          type: object
+          properties:
+            created_at:
+              type: string
+              format: "date-time"
+            updated_at:
+              type: string
+              format: "date-time"
+          required:
+            - created_at
+            - updated_at
+      required:
+        - name
+        - type
+        - date
+        - revision
+
+    SecretMetaType:
+      description: "Secrets types: registry, certificate, environment, dek"
+      enum: ["registry", "certificate", "environment", "dek"]
+      example: "registry"
+
+    SecretMetaResponse:
+      description: Secret metadata response
+      type: object
+      properties:
+        name:
+          type: string
+          description: Project name
+          minLength: 1
+          pattern: "^[A-Z_]+$"
+        type:
+          $ref: "#/components/schemas/SecretMetaType"
+        payload:
+          oneOf:
+            - $ref: "#/components/schemas/SecretMetaResponseCertificatePayload"
+            - $ref: "#/components/schemas/SecretMetaResponseRegistryPayload"
+            - $ref: "#/components/schemas/SecretMetaResponseDek"
+        revision:
+          type: integer
+          description: Secret revision
+          example: 23
+        date:
+          type: object
+          properties:
+            created_at:
+              type: string
+              format: "date-time"
+            updated_at:
+              type: string
+              format: "date-time"
+          required:
+            - created_at
+            - updated_at
+      required:
+        - name
+        - type
+        - date
+        - revision
+
+    SecretMetaResponseCertificatePayload:
+      description: Secret metadata certificate payload
+      type: object
+      properties:
+        certificate:
+          type: string
+          minLength: 1
+          description: Public SSL certificate
+          example: "<x509 content>"
+          format: string
+      required:
+        - certificate
+
+    SecretMetaResponseRegistryPayload:
+      description: Secret metadata registry payload
+      type: object
+      properties:
+        registry:
+          type: string
+          minLength: 1
+          description: Registry domain
+          example: ghcr.io
+          format: string
+      required:
+        - registry
+
+    SecretMetaResponseDek:
+      description: "DEK secret, `type: dek`"
+      type: object
+      properties:
+        public:
+          type: string
+          description: Base64 encoded DEK public key
+      required:
+        - public
+
+    SecretCreatePayload:
+      description: Payload for secret
+      type: object
+      oneOf:
+        - $ref: "#/components/schemas/SecretRegistry"
+        - $ref: "#/components/schemas/SecretEnvironment"
+        - $ref: "#/components/schemas/SecretCertificate"
+
+    SecretCreateType:
+      description: "Secrets types: registry, certificate, environment"
+      enum: ["registry", "certificate", "environment"]
+      example: "registry"
+
+    SecretEnvironment:
+      description: "Encrypted ENV secret, `type: environment`"
+      type: object
+      properties:
+        environment_value:
+          type: string
+          format: base64
+          description: Encrypted environment pairs (key - env key, value - env value)
+          example: SGVsbG8gd29ybGQ=
+      required:
+        - environment_value
+
+    SecretCertificate:
+      description: "Encrypted SSL private key and plain certificate.
+        Certificate expected in x509 pem format, key expected in pkcs8 or pkcs1 pem format.
+        `type: certificate`"
+      type: object
+      properties:
+        certificate:
+          type: string
+          description: Public certificate
+          example: <x509 certificate pem format>
+        certificate_value:
+          type: string
+          format: base64
+          description: Encrypted certificate private key
+          example: <base64 encrypted pkcs8 or pkcs1 pem format>
+      required:
+        - certificate
+        - certificate_value
+
+    SecretRegistry:
+      description: "Encrypted private container registry, `type: registry`"
+      type: object
+      properties:
+        registry:
+          type: string
+          format: url
+          description: Url to private container repository (for docker registry use https://index.docker.io/v1/)
+          example: https://index.docker.io/v1/
+        registry_value:
+          type: string
+          format: base64
+          description: Token used for auth to the registry
+          example: SGVsbG8gd29ybGQ=
+      required:
+        - registry
+        - registry_value
+
+    SecretBody:
+      description: Secret body
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Secret name
+          pattern: "^[A-Z_]+$"
+        type:
+          $ref: "#/components/schemas/SecretCreateType"
+        payload:
+          $ref: "#/components/schemas/SecretCreatePayload"
+        encryption:
+          type: string
+          description: Encryption entity
+          example: keys/dek/123
+      required:
+        - name
+        - type
+        - payload
+        - encryption
+    # SecretBodyCertificatePayload:
+    #   description: Secret body certificate payload
+    #   type: object
+    #   properties:
+    #     domain:
+    #       type: string
+    #       minLength: 1
+    #       description: Domain
+    #       example: "my-app.com"
+    #       format: string
+    #     secret:
+    #       type: string
+    #       minLength: 1
+    #       description: Base64 encoded certificate
+    #   required:
+    #     - domain
+    #     - secret
+    # SecretBodyEnvironmentPayload:
+    #   description: Secret body environment payload
+    #   type: object
+    #   properties:
+    #     env:
+    #       type: string
+    #       minLength: 1
+    #       description: Environment name
+    #       example: MY_SCRET_NAME
+    #       format: string
+    #       pattern: "^[A-Z_]+$"
+    #     secret:
+    #       type: string
+    #       minLength: 1
+    #       description: Base64 encoded secret value
+    #   required:
+    #     - env
+    #     - secret
+    # SecretBodyRegistryPayload:
+    #   description: Secret body registry payload
+    #   type: object
+    #   properties:
+    #     registry:
+    #       type: string
+    #       minLength: 1
+    #       description: Registry domain
+    #       example: ghcr.io
+    #       format: string
+    #     secret:
+    #       type: string
+    #       minLength: 1
+    #       description: Base64 encoded token
+    #   required:
+    #     - registry
+    #     - secret
+    SecretBodyPatch:
+      description: Secret body patch fields
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/SecretCreateType"
+        payload:
+          $ref: "#/components/schemas/SecretCreatePayload"
+        encryption:
+          type: string
+          description: Encryption entity
+          example: keys/dek/123
+      required:
+        - type
+        - payload
+        - encryption
 
   # responses
   responses:
@@ -532,11 +973,11 @@ components:
                     prev: "/{url}?page[before]=20&page[size]=20"
                     next: "/{url}?page[after]=40&page[size]=20"
                 data:
-                  - id: "2443"
-                    user_id: "8796"
+                  - id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
+                    user_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
                     name: "my org"
-                  - id: "2444"
-                    user_id: "2587"
+                  - id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
+                    user_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
                     name: "api dev org"
     Organisation:
       description: Get organisation
@@ -547,8 +988,8 @@ components:
           examples:
             paginated-organisations:
               value:
-                id: "2443"
-                user_id: "8796"
+                id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
+                user_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
                 name: "my org"
 
     ListProjects:
@@ -569,11 +1010,11 @@ components:
                     prev: "/{url}?page[before]=20&page[size]=20"
                     next: "/{url}?page[after]=40&page[size]=20"
                 data:
-                  - id: "2443"
-                    org_id: "8796"
+                  - id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
+                    org_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
                     name: "my project"
-                  - id: "2444"
-                    org_id: "8796"
+                  - id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
+                    org_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
                     name: "first api"
     Project:
       description: Get project
@@ -584,9 +1025,86 @@ components:
           examples:
             project:
               value:
-                id: "2443"
-                org_id: "8796"
+                id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
+                org_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
                 name: "first api"
+
+    ListSecrets:
+      description: List secrets
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ListSecretResponse"
+          # examples:
+          #   paginated-projects:
+          #     value:
+          #       meta:
+          #         results: 200
+          #         start: 20
+          #         end: 40
+          #         pages: 20
+          #         links:
+          #           prev: "/{url}?page[before]=20&page[size]=20"
+          #           next: "/{url}?page[after]=40&page[size]=20"
+          #       data:
+          #         - name: "FIRST_SECRET"
+          #           type: registry
+          #           date:
+          #             created_at: "2023-07-22T14:50:13Z20230722T145013Z"
+          #             updated_at: "2023-07-22T14:50:13Z20230722T145013Z"
+          #         - name: "SECOND_SECRET"
+          #           type: certificate
+          #           date:
+          #             created_at: "2023-07-22T14:50:13Z20230722T145013Z"
+          #             updated_at: "2023-07-22T14:50:13Z20230722T145013Z"
+    Secret:
+      description: Get secret
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SecretResponse"
+          # examples:
+          #   secret:
+          #     value:
+          #       name: "FIRST_SECRET"
+          #       type: registry
+          #       date:
+          #         created_at: "2023-07-22T14:50:13Z20230722T145013Z"
+          #         updated_at: "2023-07-22T14:50:13Z20230722T145013Z"
+    SecretMeta:
+      description: Get secret metadata
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SecretMetaResponse"
+          examples:
+            secret-meta-registry:
+              value:
+                name: "FIRST_SECRET"
+                type: registry
+                payload:
+                  registry: "ghcr.io"
+                date:
+                  created_at: "2023-07-22T14:50:13Z20230722T145013Z"
+                  updated_at: "2023-07-22T14:50:13Z20230722T145013Z"
+            secret-meta-certificate:
+              value:
+                name: "FIRST_SECRET"
+                type: certificate
+                payload:
+                  domain: "ghcr.io"
+                date:
+                  created_at: "2023-07-22T14:50:13Z20230722T145013Z"
+                  updated_at: "2023-07-22T14:50:13Z20230722T145013Z"
+            secret-meta-environment:
+              value:
+                name: "FIRST_SECRET"
+                type: enviornment
+                payload:
+                  env: "MY_SECRET_NAME"
+                date:
+                  created_at: "2023-07-22T14:50:13Z20230722T145013Z"
+                  updated_at: "2023-07-22T14:50:13Z20230722T145013Z"
 
   # request bodies
   requestBodies:
@@ -612,11 +1130,48 @@ components:
                 name: first api
       description: Create/Update any field
     ProjectBodyPatch:
-       content:
-         application/json:
-           schema:
-             $ref: "#/components/schemas/ProjectBodyPatch"
-       description: Update any field
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProjectBodyPatch"
+      description: Update any field
+
+    SecretBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SecretBody"
+          examples:
+            secret-registry-create:
+              value:
+                name: FIRST_API
+                type: registry
+                payload:
+                  registry: "ghcr.io"
+                  secret: "VGhpcyBzaG91bGQgYmUgYSBzZWN1cmUgc2VjcmV0LCBnZW5lcmF0ZSBsZW5ndGh5IGNyZWRlbnRpYWxzCg=="
+            secret-certificate-create:
+              value:
+                name: FIRST_API
+                type: certificate
+                payload:
+                  domain: "my-app.com"
+                  secret: "VGhpcyB3b3VsZCBiZSB5b3VyIGNlcnRpZmljYXRlCg=="
+            secret-environment-create:
+              value:
+                name: FIRST_API
+                type: environment
+                payload:
+                  env: "MY_FIRST_SECRET"
+                  secret: "bXkgc2VjcmV0IHZhbHVlCg=="
+      description: Create/Update any field
+      required: true
+    SecretBodyPatch:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SecretBodyPatch"
+      description: Update any field
+      required: true
 
   # parameters
   parameters:
@@ -659,6 +1214,23 @@ components:
         format: uuid
         example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
       description: Project ID reference
+    # secrets
+    secret_type:
+      in: query
+      name: secret_type
+      schema:
+        $ref: "#/components/schemas/SecretMetaType"
+      description: Type of secret to filter on
+    secret_name:
+      name: secret_name
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        example: MY_SECRET
+        pattern: "^[A-Z_]+$"
+      description: Unique secret name
 
   securitySchemes:
     token:
@@ -676,3 +1248,5 @@ tags:
     description: Project operations, projects belong to an organisation
   - name: organisations
     description: Organisations are a hierarchy top-level for a user, they allow for organising of projects
+  - name: secrets
+    description: Secret operations for certificates, environment and container registry
