@@ -340,6 +340,77 @@ paths:
       security:
         - token: []
         - cookie: []
+
+  /auth/tokens:
+    post:
+      summary: Create new auth token
+      description: Create new OAuth client which can be used to access user private data
+      tags:
+        - tokens
+      requestBody:
+        $ref: "#/components/requestBodies/AuthTokenBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/AuthToken"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+      operationId: auth-tokens-create
+    get:
+      summary: List all user auth tokens
+      tags:
+        - tokens
+      parameters:
+        - $ref: "#/components/parameters/pagination_page"
+      responses:
+        "200":
+          $ref: "#/components/responses/AuthTokenList"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+      operationId: auth-tokens-list
+
+  /auth/tokens/{token_id}:
+    parameters:
+      - $ref: "#/components/parameters/token_id"
+    get:
+      summary: Get token information
+      tags:
+        - tokens
+      responses:
+        "200":
+          $ref: "#/components/responses/AuthTokenMeta"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+      operationId: auth-tokens-get
+    put:
+      summary: Update token
+      tags:
+        - tokens
+      requestBody:
+        $ref: "#/components/requestBodies/AuthTokenPatch"
+      responses:
+        "200":
+          $ref: "#/components/responses/AuthToken"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+      operationId: auth-tokens-update
+    delete:
+      summary: Delete token
+      tags:
+        - tokens
+      responses:
+        "200":
+          $ref: "#/components/responses/ResourceDeleted"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+      operationId: auth-tokens-delete
   # "/projects/{project_id}/secrets/{secret_type}/{secret_id}/revisions":
   #   parameters:
   #     - $ref: "#/components/parameters/project_id"
@@ -448,6 +519,128 @@ components:
           type: string
       required:
         - message
+
+    Date:
+      description: Object date information
+      type: object
+      properties:
+        created_at:
+          type: string
+          description: UTC creation datetime (ISO 8601 date format)
+          format: datetime
+          example: 2023-07-22T14:50:13Z20230722T145013Z
+        updated_at:
+          type: string
+          description: UTC update datetime (ISO 8601 date format)
+          format: datetime
+          example: 2023-07-22T14:50:13Z20230722T145013Z
+      required:
+        - created_at
+        - updated_at
+
+    AuthTokenBody:
+      description: API auth token create
+      type: object
+      properties:
+        name:
+          type: string
+          description: Token name
+          example: Build token
+        expiry_duration:
+          type: integer
+          description: Token expiration duration in days. 0 - token will never expire
+      required:
+        - name
+        - expiry_duration
+
+    AuthTokenPatch:
+      description: API auth token patch
+      properties:
+        name:
+          type: string
+          description: Token name
+          example: My updated token
+        expiry_duration:
+          type: integer
+          description: Token expiration duration in days. 0 - token will never expire
+
+    AuthToken:
+      description: API auth token
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        user_id:
+          type: string
+          description: User
+          format: uuid
+          example: a01594c7-3ebf-4ad1-8565-a7895e9c2d49
+        name:
+          type: string
+          description: Token name
+          example: "Build token"
+        expiry_at:
+          type: string
+          format: datetime
+          example: 2023-07-22T14:50:13Z20230722T145013Z
+        token:
+          type: string
+          description: OAuth2 client id and client secret used to generate API access token. Client secret can't be created and must be saved on user side
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4@T.KcV~_96jfOoD5ixFP8qu0Spm
+        date:
+          $ref: "#/components/schemas/Date"
+      required:
+        - id
+        - name
+        - user_id
+        - date
+
+    AuthTokenMeta:
+      description: API auth token meta
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        user_id:
+          type: string
+          description: User
+          format: uuid
+          example: a01594c7-3ebf-4ad1-8565-a7895e9c2d49
+        name:
+          type: string
+          example: "Build token"
+        expiry_at:
+          type: string
+          format: datetime
+          example: 2023-07-22T14:50:13Z20230722T145013Z
+        date:
+          $ref: "#/components/schemas/Date"
+      required:
+        - id
+        - name
+        - user_id
+        - date
+
+    ListAuthTokens:
+      type: object
+      description: "List of auth tokens"
+      properties:
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+          links:
+            $ref: "#/components/schemas/PaginationLinks"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuthTokenMeta"
+      required:
+        - meta
+        - data
+
     PaginationMeta:
       description: Meta object for pagination use
       type: object
@@ -496,19 +689,25 @@ components:
           description: Organisation id
           format: uuid
           minLength: 1
+          example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
         user_id:
           type: string
           description: User id
           format: uuid
           minLength: 1
+          example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
         name:
           type: string
           description: Organisation name
           minLength: 1
+          example: my org
+        # date:
+        #   $ref: "#/components/schemas/Date"
       required:
         - id
         - user_id
         - name
+        # - date
     ListOrganisationResponse:
       description: List organisations schema
       type: object
@@ -532,6 +731,7 @@ components:
           type: string
           minLength: 1
           description: Organisation name
+          example: my org
       required:
         - name
 
@@ -559,19 +759,25 @@ components:
           description: Project id
           format: uuid
           minLength: 1
+          example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
         org_id:
           type: string
           description: Organisation id
           format: uuid
           minLength: 1
+          example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
         name:
           type: string
           description: Project name
           minLength: 1
+          example: my project
+        # date:
+        #   $ref: "#/components/schemas/Date"
       required:
         - id
         - org_id
         - name
+        # - date
     ProjectBody:
       description: Project body
       type: object
@@ -581,10 +787,12 @@ components:
           minLength: 1
           description: Organisation id
           format: uuid
+          example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
         name:
           type: string
           minLength: 1
           description: Project name
+          example: first api
       required:
         - org_id
         - name
@@ -639,22 +847,12 @@ components:
           description: Secret revision
           example: 32
         date:
-          type: object
-          properties:
-            created_at:
-              type: string
-              format: "date-time"
-            updated_at:
-              type: string
-              format: "date-time"
-          required:
-            - created_at
-            - updated_at
+          $ref: "#/components/schemas/Date"
       required:
         - name
         - type
-        - date
         - revision
+        - date
 
     SecretMetaType:
       description: "Secrets types: registry, certificate, environment, dek"
@@ -682,17 +880,7 @@ components:
           description: Secret revision
           example: 23
         date:
-          type: object
-          properties:
-            created_at:
-              type: string
-              format: "date-time"
-            updated_at:
-              type: string
-              format: "date-time"
-          required:
-            - created_at
-            - updated_at
+          $ref: "#/components/schemas/Date"
       required:
         - name
         - type
@@ -939,58 +1127,45 @@ components:
           schema:
             $ref: "#/components/schemas/BadRequestResponse"
           examples:
-            user-bad-request-response:
+            generic-bad-request-response:
               value:
                 message: "Missing fields"
                 fields:
-                  email: Valid email required
-            project-bad-request-response:
-              value:
-                message: "Missing fields"
-                fields:
-                  org_id: Valid organisation required
-                  name: Valid name required
-            organisation-bad-request-response:
-              value:
-                message: "Missing fields"
-                fields:
-                  name: Name required
+                  generic_field: Valid field required
+
+    AuthToken:
+      description: OAuth2 with client id and client secret
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AuthToken"
+
+    AuthTokenMeta:
+      description: Token meta information
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AuthTokenMeta"
+
+    AuthTokenList:
+      description: List of auth token meta
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ListAuthTokens"
+
     ListOrganisations:
       description: List organisations
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ListOrganisationResponse"
-          examples:
-            paginated-organisations:
-              value:
-                meta:
-                  results: 200
-                  start: 20
-                  end: 40
-                  pages: 20
-                  links:
-                    prev: "/{url}?page[before]=20&page[size]=20"
-                    next: "/{url}?page[after]=40&page[size]=20"
-                data:
-                  - id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                    user_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                    name: "my org"
-                  - id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                    user_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                    name: "api dev org"
     Organisation:
       description: Get organisation
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/OrganisationResponse"
-          examples:
-            paginated-organisations:
-              value:
-                id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                user_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                name: "my org"
 
     ListProjects:
       description: List projects
@@ -998,36 +1173,12 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ListProjectResponse"
-          examples:
-            paginated-projects:
-              value:
-                meta:
-                  results: 200
-                  start: 20
-                  end: 40
-                  pages: 20
-                  links:
-                    prev: "/{url}?page[before]=20&page[size]=20"
-                    next: "/{url}?page[after]=40&page[size]=20"
-                data:
-                  - id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                    org_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                    name: "my project"
-                  - id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                    org_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                    name: "first api"
     Project:
       description: Get project
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ProjectResponse"
-          examples:
-            project:
-              value:
-                id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                org_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                name: "first api"
 
     ListSecrets:
       description: List secrets
@@ -1035,42 +1186,14 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ListSecretResponse"
-          # examples:
-          #   paginated-projects:
-          #     value:
-          #       meta:
-          #         results: 200
-          #         start: 20
-          #         end: 40
-          #         pages: 20
-          #         links:
-          #           prev: "/{url}?page[before]=20&page[size]=20"
-          #           next: "/{url}?page[after]=40&page[size]=20"
-          #       data:
-          #         - name: "FIRST_SECRET"
-          #           type: registry
-          #           date:
-          #             created_at: "2023-07-22T14:50:13Z20230722T145013Z"
-          #             updated_at: "2023-07-22T14:50:13Z20230722T145013Z"
-          #         - name: "SECOND_SECRET"
-          #           type: certificate
-          #           date:
-          #             created_at: "2023-07-22T14:50:13Z20230722T145013Z"
-          #             updated_at: "2023-07-22T14:50:13Z20230722T145013Z"
+
     Secret:
       description: Get secret
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/SecretResponse"
-          # examples:
-          #   secret:
-          #     value:
-          #       name: "FIRST_SECRET"
-          #       type: registry
-          #       date:
-          #         created_at: "2023-07-22T14:50:13Z20230722T145013Z"
-          #         updated_at: "2023-07-22T14:50:13Z20230722T145013Z"
+
     SecretMeta:
       description: Get secret metadata
       content:
@@ -1108,26 +1231,31 @@ components:
 
   # request bodies
   requestBodies:
+    AuthTokenBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AuthTokenBody"
+      required: true
+
+    AuthTokenPatch:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AuthTokenPatch"
+      required: true
+
     OrganisationBody:
       description: Create/Update any field
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/OrganisationBody"
-          examples:
-            organisation-create:
-              value:
-                name: API Dev
     ProjectBody:
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ProjectBody"
-          examples:
-            project-create:
-              value:
-                org_id: "3069614e-adc8-47cb-a69c-decf9c5f90fc"
-                name: first api
       description: Create/Update any field
     ProjectBodyPatch:
       content:
@@ -1231,6 +1359,15 @@ components:
         example: MY_SECRET
         pattern: "^[A-Z_]+$"
       description: Unique secret name
+    token_id:
+      name: token_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
+      description: Token ID reference
 
   securitySchemes:
     token:
@@ -1250,3 +1387,5 @@ tags:
     description: Organisations are a hierarchy top-level for a user, they allow for organising of projects
   - name: secrets
     description: Secret operations for certificates, environment and container registry
+  - name: tokens
+    description: Auth tokens for third party clients
