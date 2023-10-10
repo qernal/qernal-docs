@@ -710,13 +710,13 @@ components:
           description: Organisation name
           minLength: 1
           example: my org
-        # date:
-        #   $ref: "#/components/schemas/Date"
+        date:
+          $ref: "#/components/schemas/Date"
       required:
         - id
         - user_id
         - name
-        # - date
+        - date
     ListOrganisationResponse:
       description: List organisations schema
       type: object
@@ -780,13 +780,13 @@ components:
           description: Project name
           minLength: 1
           example: my project
-        # date:
-        #   $ref: "#/components/schemas/Date"
+        date:
+          $ref: "#/components/schemas/Date"
       required:
         - id
         - org_id
         - name
-        # - date
+        - date
     ProjectBody:
       description: Project body
       type: object
