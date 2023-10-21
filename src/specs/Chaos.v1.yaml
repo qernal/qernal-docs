@@ -341,6 +341,101 @@ paths:
         - token: []
         - cookie: []
 
+  "/projects/{project_id}/hosts":
+    post:
+      summary: Create host for project
+      description: |
+        Assign a host/domain to a project - hosts are globally unique and require verification, so a host cannot be assigned to multiple projects.
+
+        A host can be a valid domain, either a root domain or a subdomain.
+      operationId: projects-hosts-create
+      tags:
+        - hosts
+      parameters:
+        - $ref: "#/components/parameters/project_id"
+      security:
+        - token: []
+        - cookie: []
+      requestBody:
+        $ref: "#/components/requestBodies/HostBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/Host"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/ResourceConflict"
+    get:
+      summary: List hosts for project
+      operationId: projects-hosts-list
+      parameters:
+        - $ref: "#/components/parameters/project_id"
+        - $ref: "#/components/parameters/pagination_page"
+      security:
+        - token: []
+        - cookie: []
+      tags:
+        - hosts
+      responses:
+        "200":
+          $ref: "#/components/responses/ListHosts"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+
+  "/projects/{project_id}/hosts/{hostname}":
+    get:
+      summary: Get specific host by hostname
+      operationId: projects-hosts-get
+      parameters:
+        - $ref: "#/components/parameters/project_id"
+        - $ref: "#/components/parameters/hostname"
+      security:
+        - token: []
+        - cookie: []
+      tags:
+        - hosts
+      responses:
+        "200":
+          $ref: "#/components/responses/Host"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+    delete:
+      summary: Delete specific host by hostname
+      operationId: projects-hosts-delete
+      parameters:
+        - $ref: "#/components/parameters/project_id"
+        - $ref: "#/components/parameters/hostname"
+      security:
+        - token: []
+        - cookie: []
+      tags:
+        - hosts
+      responses:
+        "200":
+          $ref: "#/components/responses/ResourceDeleted"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+    put:
+      summary: Update specific host by hostname
+      operationId: projects-hosts-update
+      parameters:
+        - $ref: "#/components/parameters/project_id"
+        - $ref: "#/components/parameters/hostname"
+      security:
+        - token: []
+        - cookie: []
+      tags:
+        - hosts
+      requestBody:
+        $ref: "#/components/requestBodies/HostBodyPatch"
+      responses:
+        "200":
+          $ref: "#/components/responses/Host"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+
   "/auth/tokens":
     post:
       summary: Create new auth token
@@ -542,6 +637,107 @@ components:
       required:
         - created_at
         - updated_at
+
+    Host:
+      description: Host response
+      type: object
+      properties:
+        id:
+          type: string
+          description: Host id
+          format: uuid
+        host:
+          type: string
+          description: Hostname, this can be a root or a subdomain
+          example: example-domain.com
+          minLength: 1
+        certificate:
+          type: string
+          description: The secret reference to the certificate
+          pattern: '^projects\:secrets/(?<secret_name>[A-Z0-9_]+)$'
+          example: "projects:secrets/MY_CERT"
+        project_id:
+          type: string
+          description: Project ID this is attached to
+          format: uuid
+          minLength: 1
+        read_only:
+          type: boolean
+          description: If the host is read only and cannot be removed, primarily used for *.qrnl.app domains
+        disabled:
+          type: boolean
+          description: If the host is disabled and so won't be routable
+        txt_verification:
+          type: string
+          description: TXT record of host to verify ownership - if this record is removed, it may become unverified as this is checked periodically to continually verify ownership
+          example: qernal=my.app=KSjfasiqwePdsakm12kdas3
+        verified_at:
+          type: string
+          description: UTC datetime when the host was verified (ISO 8601 date format).
+          format: datetime
+          example: 2023-07-22T14:50:13Z20230722T145013Z
+        date:
+          $ref: "#/components/schemas/Date"
+      required:
+        - id
+        - host
+        - project_id
+        - read_only
+        - disabled
+        - txt_verification
+        - date
+
+    ListHosts:
+      type: object
+      description: "List of projects hosts"
+      properties:
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+          links:
+            $ref: "#/components/schemas/PaginationLinks"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Host"
+      required:
+        - meta
+        - data
+
+    HostBody:
+      description: Host body
+      type: object
+      properties:
+        host:
+          type: string
+          minLength: 1
+          description: Hostname
+        certificate:
+          type: string
+          minLength: 1
+          description: Reference to secret certificate path
+          pattern: '^projects\:secrets/(?<secret_name>[A-Z0-9_]+)$'
+          example: "projects:secrets/MY_CERT"
+        disabled:
+          type: boolean
+          description: If the host is disabled, then this host won't be accessible and so the deployments will not be routable on this host
+      required:
+        - host
+        - certificate
+        - disabled
+
+    HostBodyPatch:
+      description: Host body update
+      type: object
+      properties:
+        certificate:
+          type: string
+          minLength: 1
+          description: Reference to secret certificate path
+          pattern: '^projects\:secrets/(?<secret_name>[A-Z0-9_]+)$'
+          example: "projects:secrets/MY_CERT"
+        disabled:
+          type: boolean
+          description: If the host is disabled, then this host won't be accessible and so the deployments will not work on this host
 
     AuthTokenBody:
       description: API auth token create
@@ -1141,6 +1337,19 @@ components:
                 message: "Missing fields"
                 fields:
                   generic_field: Valid field required
+    Host:
+      description: Porject host
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Host"
+
+    ListHosts:
+      description: List of project hosts
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ListHosts"
 
     AuthToken:
       description: Generated token response
@@ -1240,6 +1449,20 @@ components:
 
   # request bodies
   requestBodies:
+    HostBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HostBody"
+      required: true
+
+    HostBodyPatch:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HostBodyPatch"
+      required: true
+
     AuthTokenBody:
       content:
         application/json:
@@ -1377,6 +1600,14 @@ components:
         format: uuid
         example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
       description: Token ID reference
+    hostname:
+      name: hostname
+      in: path
+      required: true
+      schema:
+        type: string
+        example: example-domain.com
+      description: Hostname
 
   securitySchemes:
     token:
