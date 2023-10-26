@@ -638,6 +638,12 @@ components:
         - created_at
         - updated_at
 
+    HostVerificationStatus:
+      description: Host verification status
+      type: string
+      enum: [pending, completed, failed]
+      example: pending
+
     Host:
       description: Host response
       type: object
@@ -678,6 +684,8 @@ components:
           example: 2023-07-22T14:50:13Z20230722T145013Z
         date:
           $ref: "#/components/schemas/Date"
+        verification_status:
+          $ref: "#/components/schemas/HostVerificationStatus"
       required:
         - id
         - host
@@ -686,6 +694,7 @@ components:
         - disabled
         - txt_verification
         - date
+        - verification_status
 
     ListHosts:
       type: object
