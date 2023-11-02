@@ -436,6 +436,26 @@ paths:
         "404":
           $ref: "#/components/responses/ResourceNotFound"
 
+  "/projects/{project_id}/hosts/{hostname}/verify":
+    post:
+      summary: Schedule host verification task
+      operationId: projects-hosts-verify-create
+      parameters:
+        - $ref: "#/components/parameters/project_id"
+        - $ref: "#/components/parameters/hostname"
+      security:
+        - token: []
+        - cookie: []
+      tags:
+        - hosts
+      responses:
+        "200":
+          $ref: "#/components/responses/Host"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
   "/auth/tokens":
     post:
       summary: Create new auth token
