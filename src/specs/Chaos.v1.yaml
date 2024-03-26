@@ -6,7 +6,7 @@ info:
   contact:
     email: support@qernal.com
   x-logo:
-    url: /assets/components/chaos.png
+    url: /assets/components/Chaos.png
     backgroundColor: "#FFFFFF"
     altText: Qernal Chaos
 servers:
@@ -17,16 +17,6 @@ security:
   - cookie: []
 
 paths:
-  # '/service/health':
-  #   get:
-  #     summary: System Health
-  #     tags:
-  #       - service
-  #     responses:
-  #       '200':
-  #         $ref: '#/components/responses/HealthCheck'
-  #     operationId: get-system-health
-  #     description: Get health of Chaos
   # organisations
   "/organisations":
     get:
@@ -143,6 +133,7 @@ paths:
           $ref: "#/components/responses/Unauthorised"
       operationId: organisations-projects-list
       description: Get all the projects linked to a specific organisation
+
   # projects
   "/projects":
     get:
@@ -239,6 +230,7 @@ paths:
       security:
         - token: []
         - cookie: []
+
   # secrets
   "/projects/{project_id}/secrets":
     parameters:
@@ -284,6 +276,7 @@ paths:
       security:
         - token: []
         - cookie: []
+
   "/projects/{project_id}/secrets/{secret_name}":
     parameters:
       - $ref: "#/components/parameters/project_id"
@@ -464,7 +457,9 @@ paths:
 
         ### Warning
         The `token` field is only shown once and can't be retrieved again without generating a new token. Securely save this once the response has been received.
-
+      security:
+        - token: []
+        - cookie: []
       tags:
         - tokens
       requestBody:
@@ -483,6 +478,9 @@ paths:
         - tokens
       parameters:
         - $ref: "#/components/parameters/pagination_page"
+      security:
+        - token: []
+        - cookie: []
       responses:
         "200":
           $ref: "#/components/responses/AuthTokenList"
@@ -499,6 +497,9 @@ paths:
       summary: Get token information
       tags:
         - tokens
+      security:
+        - token: []
+        - cookie: []
       responses:
         "200":
           $ref: "#/components/responses/AuthTokenMeta"
@@ -511,6 +512,9 @@ paths:
       summary: Update token
       tags:
         - tokens
+      security:
+        - token: []
+        - cookie: []
       requestBody:
         $ref: "#/components/requestBodies/AuthTokenPatch"
       responses:
@@ -525,6 +529,9 @@ paths:
       summary: Delete token
       tags:
         - tokens
+      security:
+        - token: []
+        - cookie: []
       responses:
         "200":
           $ref: "#/components/responses/ResourceDeleted"
@@ -576,19 +583,141 @@ paths:
   #     operationId: projects-secrets-revision-get
   #     description: List project secrets of a specific type
   # "/organisations/{organisation_id}/secrets":
+  # functions
+  '/projects/{project_id}/functions':
+    get:
+      summary: List all functions within a project
+      description: List all functions
+      parameters:
+        - $ref: "#/components/parameters/project_id"
+        - $ref: '#/components/parameters/pagination_page'
+      security:
+        - token: []
+        - cookie: []
+      tags:
+        - functions
+      responses:
+        '200':
+          $ref: '#/components/responses/ListFunction'
+      operationId: projects-functions-list
+    post:
+      summary: Create function
+      operationId: projects-functions-create
+      parameters:
+        - $ref: "#/components/parameters/project_id"
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        '201':
+          $ref: '#/components/responses/Function'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      description: Create a new function
+      requestBody:
+        $ref: '#/components/requestBodies/FunctionBody'
+      tags:
+        - functions
 
-#   /providers:
-#     get:
-#       summary: Get available providers
-#       tags:
-#         - providers
-#       responses:
-#         '200':
-#           $ref: '#/components/responses/GetProvidersSuccessResponse'
-#       operationId: get-providers
-#       description: Retrieve a list of all providers with their respective deployed regions and cities.
-#       security:
-#         - JWT: []
+  '/functions/{function_id}':
+    parameters:
+      - $ref: '#/components/parameters/function_id'
+    get:
+      summary: Get function (latest revision)
+      tags:
+        - functions
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Function'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+      operationId: functions-get
+      description: Get a specific function (latest revision)
+    put:
+      summary: Update function
+      operationId: functions-update
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Function'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+      tags:
+        - functions
+      description: Update a function (creates a new revision)
+      requestBody:
+        $ref: '#/components/requestBodies/FunctionBodyPatch'
+    delete:
+      summary: Delete function
+      operationId: functions-delete
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        '200':
+          $ref: '#/components/responses/ResourceDeleted'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+      tags:
+        - functions
+      description: Delete a function (and all revisions)
+
+  '/functions/{function_id}/revisions':
+    parameters:
+      - $ref: '#/components/parameters/function_id'
+    get:
+      summary: List all revisions for a function
+      parameters:
+        - $ref: '#/components/parameters/pagination_page'
+      security:
+        - token: []
+        - cookie: []
+      tags:
+        - functions
+      responses:
+        '200':
+          $ref: '#/components/responses/ListFunction'
+      operationId: functions-revisions-list
+      description: List all revisions for a function
+
+  '/functions/{function_id}/revisions/{function_revision_id}':
+    parameters:
+      - $ref: '#/components/parameters/function_id'
+      - $ref: '#/components/parameters/function_revision_id'
+    get:
+      summary: Get a specific revision of a function
+      tags:
+        - functions
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Function'
+      operationId: functions-revisions-get
+      description: Get a specific revision of a function
+
+  # providers
+  '/providers':
+    get:
+      summary: Get available providers
+      tags:
+        - providers
+      responses:
+        '200':
+          $ref: '#/components/responses/Provider'
+      operationId: providers-get
+      description: Retrieve a list of all providers with their respective deployed regions and cities.
+      security:
+        - token: []
+        - cookie: []
 
 components:
   # schemas
@@ -1310,6 +1439,400 @@ components:
         - payload
         - encryption
 
+    Location:
+      type: object
+      description: Location of allowed clusters
+      properties:
+        provider_id:
+          type: string
+          format: uuid
+          description: UUID of provider to deploy into
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        continent:
+          type: string
+          description: Deployment continent
+          example: EU
+        country:
+          type: string
+          description: Deployment country
+          example: GB
+        city:
+          type: string
+          description: Deployment city
+          example: London
+      required:
+        - provider_id
+
+    FunctionScaling:
+      type: object
+      description: Scaling logic
+      properties:
+        type:
+          type: string
+          description: CPU or Memory supported
+          enum: [cpu, memory]
+          example: cpu
+        low:
+          type: integer
+          description: For type to drop below before scale down
+          minLength: 1
+          example: 30
+        high:
+          type: integer
+          description: For type to go above before scale up
+          minLength: 1
+          example: 60
+      required:
+        - type
+        - low
+        - high
+
+    FunctionReplicas:
+      type: object
+      description: Balancing logic
+      properties:
+        min:
+          type: integer
+          description: Minimum number of replicas to have
+          minLength: 1
+          example: 1
+        max:
+          type: integer
+          description: Maximum number of replicas to have
+          minLength: 1
+          example: 5
+        affinity:
+          type: object
+          description: Replica strategy
+          properties:
+            cluster:
+              type: boolean
+              description: If there are > 1 replica, make sure they're on different clusters
+              example: true
+            cloud:
+              type: boolean
+              description: If there are > 1 replica, make sure they're on different clouds
+              example: true
+          required:
+            - cluster
+            - cloud
+      required:
+        - min
+        - max
+        - affinity
+
+    FunctionEnv:
+      type: object
+      description: Environment variable for function
+      properties:
+        name:
+          type: string
+          description: Key name
+          example: MY_ENV_VAR
+        reference:
+          type: string
+          description: Reference to the secret to use
+          example: "project_id/secret_id"
+      required:
+        - name
+        - reference
+
+    FunctionCompliance:
+      type: string
+      description: |
+        Tagged requirements for compliance;
+        soc2 = SOC2 compliant data centers
+        ipv6 = Function can work within an ipv6 *only* cluster
+      enum: [soc2, ipv6]
+
+    FunctionType:
+      type: string
+      enum: [http, worker]
+      description: Type of function, worker types are not exposed to ingress routes
+      example: http
+
+    FunctionSize:
+      type: object
+      description: Size of function, required CPU and Memory
+      properties:
+        cpu:
+          type: integer
+          description: |
+            CPU in 0.1 vCPU increments, for a whole vCPU specify 1024
+            Must be in multiples of 128, with the same multiplier as memory
+          example: 128
+        memory:
+          type: integer
+          description: |
+            Memory in 128 MB increments, values are integer always in MB
+            Must be in multiples of 128, with the same multiplier as CPU
+          example: 128
+      required:
+        - cpu
+        - memory
+
+    FunctionDeployment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the deployment
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        location:
+          $ref: "#/components/schemas/Location"
+        replicas:
+          $ref: "#/components/schemas/FunctionReplicas"
+      required:
+        - location
+        - replicas
+
+    FunctionDeploymentBody:
+      type: object
+      properties:
+        location:
+          $ref: "#/components/schemas/Location"
+        replicas:
+          $ref: "#/components/schemas/FunctionReplicas"
+      required:
+        - location
+        - replicas
+
+    FunctionRoute:
+      type: object
+      properties:
+        path:
+          type: string
+          description: Can be a regular expression
+          example: /hello/{0-9+}
+          minLength: 1
+        methods:
+          type: array
+          description: HTTP Verb(s) for this function
+          items:
+            type: string
+            example: GET
+          example: [GET, POST]
+        weight:
+          type: integer
+          description: The route weight for consideration
+          example: 50
+          minLength: 1
+      required: [path, methods, weight]
+
+    Function:
+      type: object
+      description: Function
+      properties:
+        id:
+          type: string
+          description: ID of the function
+          minLength: 1
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        project_id:
+          type: string
+          description: ID of the project this function belongs to
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        version:
+          type: string
+          enum: ['1.0.0']
+          description: Function spec version
+          example: '1.0.0'
+        name:
+          type: string
+          description: Name of the function
+          minLength: 1
+          example: my-function
+        description:
+          type: string
+          description: Description of what the function does
+          example: My function does this
+        image:
+          type: string
+          description: Path to container image
+          minLength: 1
+          example: docker.io/my-image:latest
+        revision:
+          type: string
+          description: Function revision
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        type:
+          $ref: "#/components/schemas/FunctionType"
+        size:
+          $ref: "#/components/schemas/FunctionSize"
+        port:
+          type: integer
+          description: Port the application runs on
+          example: 8080
+        routes:
+          type: array
+          description: The public route/path to this function, only applicable to http type functions
+          items:
+            $ref: "#/components/schemas/FunctionRoute"
+        scaling:
+          $ref: "#/components/schemas/FunctionScaling"
+        deployments:
+          type: array
+          description: List of deployments for this function
+          items:
+            $ref: "#/components/schemas/FunctionDeployment"
+        secrets:
+          type: array
+          description: List of environment variables for secrets
+          items:
+            $ref: "#/components/schemas/FunctionEnv"
+        compliance:
+          type: array
+          description: Tags to limit deployment
+          items:
+            $ref: "#/components/schemas/FunctionCompliance"
+      required:
+        - id
+        - project_id
+        - version
+        - name
+        - description
+        - image
+        - revision
+        - type
+        - size
+        - port
+        - scaling
+        - deployments
+        - secrets
+
+    FunctionBody:
+      description: Function create body
+      type: object
+      properties:
+        project_id:
+          type: string
+          description: ID of the project this function belongs to
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        version:
+          type: string
+          enum: ['1.0.0']
+          description: Function spec version
+          example: '1.0.0'
+        name:
+          type: string
+          description: Name of the function
+          minLength: 1
+          example: my-function
+        description:
+          type: string
+          description: Description of what the function does
+          example: My function does this
+        image:
+          type: string
+          description: Path to container image
+          minLength: 1
+          example: docker.io/my-image:latest
+        type:
+          $ref: "#/components/schemas/FunctionType"
+        size:
+          $ref: "#/components/schemas/FunctionSize"
+        port:
+          type: integer
+          description: Port the application runs on
+          example: 8080
+        routes:
+          type: array
+          description: The public route/path to this function, only applicable to http type functions
+          items:
+            $ref: "#/components/schemas/FunctionRoute"
+        scaling:
+          $ref: "#/components/schemas/FunctionScaling"
+        deployments:
+          type: array
+          description: List of deployments for this function
+          items:
+            $ref: "#/components/schemas/FunctionDeploymentBody"
+        secrets:
+          type: array
+          description: List of environment variables for secrets
+          items:
+            $ref: "#/components/schemas/FunctionEnv"
+        compliance:
+          type: array
+          description: Tags to limit deployment
+          items:
+            $ref: "#/components/schemas/FunctionCompliance"
+      required:
+        - project_id
+        - version
+        - name
+        - description
+        - image
+        - type
+        - size
+        - port
+        - scaling
+        - deployments
+        - secrets
+
+    ListFunction:
+      type: object
+      description: 'List of functions'
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+          links:
+            $ref: '#/components/schemas/PaginationLinks'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Function'
+      required:
+        - meta
+        - data
+
+    Provider:
+      description: List of providers
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+            example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+          name:
+            type: string
+            minLength: 1
+            description: Name of provider
+            example: AWS
+          locations:
+            type: object
+            description: Locations at varying levels this provider operates within
+            properties:
+              continents:
+                type: array
+                items:
+                  type: string
+                  description: Deployment continent
+                  example: EU
+              countries:
+                type: array
+                items:
+                  type: string
+                  description: Deployment country
+                  example: GB
+              cities:
+                type: array
+                items:
+                  type: string
+                  description: Deployment city
+                  example: London
+      required:
+        - id
+        - name
+        - locations
+
   # responses
   responses:
     NoContent:
@@ -1476,6 +1999,27 @@ components:
                   created_at: "2023-07-22T14:50:13Z20230722T145013Z"
                   updated_at: "2023-07-22T14:50:13Z20230722T145013Z"
 
+    ListFunction:
+      description: List all functions (paginated)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ListFunction'
+
+    Function:
+      description: Get specific function
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Function'
+
+    Provider:
+      description: List providers
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Provider'
+
   # request bodies
   requestBodies:
     HostBody:
@@ -1554,12 +2098,29 @@ components:
                   secret: "bXkgc2VjcmV0IHZhbHVlCg=="
       description: Create/Update any field
       required: true
+
     SecretBodyPatch:
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/SecretBodyPatch"
       description: Update any field
+      required: true
+
+    FunctionBody:
+      description: Create/Update any field
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FunctionBody'
+      required: true
+
+    FunctionBodyPatch:
+      description: Update any field
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Function'
       required: true
 
   # parameters
@@ -1585,6 +2146,7 @@ components:
       style: deepObject
       explode: true
       description: Query parameters for pagination
+    # organisations
     organisation_id:
       name: organisation_id
       in: path
@@ -1594,6 +2156,7 @@ components:
         format: uuid
         example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
       description: Organisation ID reference
+    # projects
     project_id:
       name: project_id
       in: path
@@ -1620,6 +2183,7 @@ components:
         example: MY_SECRET
         pattern: "^[A-Z_]+$"
       description: Unique secret name
+    # auth
     token_id:
       name: token_id
       in: path
@@ -1629,6 +2193,7 @@ components:
         format: uuid
         example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
       description: Token ID reference
+    # hosts
     hostname:
       name: hostname
       in: path
@@ -1637,6 +2202,25 @@ components:
         type: string
         example: example-domain.com
       description: Hostname
+    # functions
+    function_id:
+      name: function_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
+      description: Function ID reference
+    function_revision_id:
+      name: function_revision_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 069614e-adc8-47cb-a69c-decf9c5f90fc
+      description: Function revision ID reference
 
   securitySchemes:
     token:
@@ -1657,3 +2241,9 @@ tags:
     description: Secret operations for certificates, environment and container registry
   - name: tokens
     description: Auth tokens for third party clients
+  - name: functions
+    description: Function operations, allows deployment of containers via the function endpoints
+  - name: providers
+    description: List of providers you can use to deploy functions into and their available locations - this includes any private providers attached to your organisation
+  - name: hosts
+    description: Hosts attached to the project so make functions routeable via the internet
