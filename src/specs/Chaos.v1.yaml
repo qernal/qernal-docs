@@ -1532,7 +1532,7 @@ components:
         reference:
           type: string
           description: Reference to the secret to use
-          example: "project_id/secret_id"
+          example: "project_id/secret_id@secret_revision"
       required:
         - name
         - reference
