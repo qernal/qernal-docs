@@ -22,6 +22,7 @@ paths:
     get:
       parameters:
         - $ref: "#/components/parameters/pagination_page"
+        - $ref: "#/components/parameters/filter_name"
       summary: List organisations
       tags:
         - organisations
@@ -139,6 +140,7 @@ paths:
     get:
       parameters:
         - $ref: "#/components/parameters/pagination_page"
+        - $ref: "#/components/parameters/filter_name"
       summary: List projects
       tags:
         - projects
@@ -803,9 +805,10 @@ components:
           format: uuid
         host:
           type: string
-          description: Hostname, this can be a root or a subdomain
+          description: Hostname, this can be the root of a domain or a subdomain
           example: example-domain.com
           minLength: 1
+          # TODO: add domain pattern
         certificate:
           type: string
           description: The secret reference to the certificate
@@ -821,7 +824,7 @@ components:
           description: If the host is read only and cannot be removed, primarily used for *.qrnl.app domains
         disabled:
           type: boolean
-          description: If the host is disabled and so won't be routable
+          description: If the host is disabled, then this host won't be accessible and so the deployments will not be routable
         txt_verification:
           type: string
           description: TXT record of host to verify ownership - if this record is removed, it may become unverified as this is checked periodically to continually verify ownership
@@ -865,19 +868,12 @@ components:
       description: Host body
       type: object
       properties:
-        host:
-          type: string
-          minLength: 1
-          description: Hostname
-        certificate:
-          type: string
-          minLength: 1
-          description: Reference to secret certificate path
-          pattern: '^projects\:secrets/(?<secret_name>[A-Z0-9_]+)$'
-          example: "projects:secrets/MY_CERT"
-        disabled:
-          type: boolean
-          description: If the host is disabled, then this host won't be accessible and so the deployments will not be routable on this host
+        host: #resolve:true
+          $ref: '#/components/schemas/Host/properties/host'
+        certificate: #resolve:true
+          $ref: '#/components/schemas/Host/properties/certificate'
+        disabled: #resolve:true
+          $ref: '#/components/schemas/Host/properties/disabled'
       required:
         - host
         - certificate
@@ -887,15 +883,10 @@ components:
       description: Host body update
       type: object
       properties:
-        certificate:
-          type: string
-          minLength: 1
-          description: Reference to secret certificate path
-          pattern: '^projects\:secrets/(?<secret_name>[A-Z0-9_]+)$'
-          example: "projects:secrets/MY_CERT"
-        disabled:
-          type: boolean
-          description: If the host is disabled, then this host won't be accessible and so the deployments will not work on this host
+        certificate: #resolve:true
+          $ref: '#/components/schemas/Host/properties/certificate'
+        disabled: #resolve:true
+          $ref: '#/components/schemas/Host/properties/disabled'
 
     AuthTokenBody:
       description: API auth token create
@@ -904,7 +895,8 @@ components:
         name:
           type: string
           description: Name of token
-          example: TF token
+          example: tf-token
+          pattern: "^[A-z-]+$"
         expiry_duration:
           type: integer
           description: Token expiration duration in days. 0 - token will never expire
@@ -916,14 +908,10 @@ components:
     AuthTokenPatch:
       description: API auth token patch
       properties:
-        name:
-          type: string
-          description: Name of token
-          example: My updated token
-        expiry_duration:
-          type: integer
-          description: Token expiration duration in days. 0 - token will never expire
-          example: 90
+        name: #resolve:true
+          $ref: '#/components/schemas/AuthTokenBody/properties/name'
+        expiry_duration: #resolve:true
+          $ref: '#/components/schemas/AuthTokenBody/properties/expiry_duration'
 
     AuthToken:
       description: API auth token
@@ -947,6 +935,7 @@ components:
           type: string
           format: datetime
           example: 2023-07-22T14:50:13Z20230722T145013Z
+          description: When the token expires
         token:
           type: string
           description: Combined token required for requesting an access token, this field is only returned once on creation or update (during regeneration).
@@ -1063,7 +1052,8 @@ components:
           type: string
           description: Organisation name
           minLength: 1
-          example: my org
+          pattern: "^[A-z-]+$"
+          example: my-org
         date:
           $ref: "#/components/schemas/Date"
       required:
@@ -1090,11 +1080,8 @@ components:
       description: Organisation body
       type: object
       properties:
-        name:
-          type: string
-          minLength: 1
-          description: Organisation name
-          example: my org
+        name: #resolve:true
+          $ref: '#/components/schemas/OrganisationResponse/properties/name'
       required:
         - name
 
@@ -1133,7 +1120,8 @@ components:
           type: string
           description: Project name
           minLength: 1
-          example: my project
+          pattern: "^[A-z-]+$"
+          example: first-api
         date:
           $ref: "#/components/schemas/Date"
       required:
@@ -1145,17 +1133,10 @@ components:
       description: Project body
       type: object
       properties:
-        org_id:
-          type: string
-          minLength: 1
-          description: Organisation id
-          format: uuid
-          example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
-        name:
-          type: string
-          minLength: 1
-          description: Project name
-          example: first api
+        org_id: #resolve:true
+          $ref: '#/components/schemas/ProjectResponse/properties/org_id'
+        name: #resolve:true
+          $ref: '#/components/schemas/ProjectResponse/properties/name'
       required:
         - org_id
         - name
@@ -1164,15 +1145,11 @@ components:
       description: Project patch fields
       type: object
       properties:
-        org_id:
-          type: string
-          minLength: 1
-          description: Organisation id
-          format: uuid
-        name:
-          type: string
-          minLength: 1
-          description: Project name
+        org_id: #resolve:true
+          $ref: '#/components/schemas/ProjectResponse/properties/org_id'
+        name: #resolve:true
+          $ref: '#/components/schemas/ProjectResponse/properties/name'
+
     # secrets
     ListSecretResponse:
       type: object
@@ -1226,11 +1203,8 @@ components:
       description: Secret metadata response
       type: object
       properties:
-        name:
-          type: string
-          description: Project name
-          minLength: 1
-          pattern: "^[A-Z_]+$"
+        name: #resolve:true
+          $ref: '#/components/schemas/SecretResponse/properties/name'
         type:
           $ref: "#/components/schemas/SecretMetaType"
         payload:
@@ -1238,10 +1212,8 @@ components:
             - $ref: "#/components/schemas/SecretMetaResponseCertificatePayload"
             - $ref: "#/components/schemas/SecretMetaResponseRegistryPayload"
             - $ref: "#/components/schemas/SecretMetaResponseDek"
-        revision:
-          type: integer
-          description: Secret revision
-          example: 23
+        revision: #resolve:true
+          $ref: '#/components/schemas/SecretResponse/properties/revision'
         date:
           $ref: "#/components/schemas/Date"
       required:
@@ -1337,8 +1309,8 @@ components:
         registry:
           type: string
           format: url
-          description: Url to private container repository (for docker registry use https://index.docker.io/v1/)
-          example: https://index.docker.io/v1/
+          description: Url to private container repository (for docker registry use docker.io)
+          example: ghcr.io
         registry_value:
           type: string
           format: base64
@@ -1352,11 +1324,8 @@ components:
       description: Secret body
       type: object
       properties:
-        name:
-          type: string
-          minLength: 1
-          description: Secret name
-          pattern: "^[A-Z_]+$"
+        name: #resolve:true
+          $ref: '#/components/schemas/SecretResponse/properties/name'
         type:
           $ref: "#/components/schemas/SecretCreateType"
         payload:
@@ -1365,63 +1334,12 @@ components:
           type: string
           description: Encryption entity
           example: keys/dek/123
+          pattern: "^keys\\/dek\\/[0-9]+$"
       required:
         - name
         - type
         - payload
         - encryption
-    # SecretBodyCertificatePayload:
-    #   description: Secret body certificate payload
-    #   type: object
-    #   properties:
-    #     domain:
-    #       type: string
-    #       minLength: 1
-    #       description: Domain
-    #       example: "my-app.com"
-    #       format: string
-    #     secret:
-    #       type: string
-    #       minLength: 1
-    #       description: Base64 encoded certificate
-    #   required:
-    #     - domain
-    #     - secret
-    # SecretBodyEnvironmentPayload:
-    #   description: Secret body environment payload
-    #   type: object
-    #   properties:
-    #     env:
-    #       type: string
-    #       minLength: 1
-    #       description: Environment name
-    #       example: MY_SCRET_NAME
-    #       format: string
-    #       pattern: "^[A-Z_]+$"
-    #     secret:
-    #       type: string
-    #       minLength: 1
-    #       description: Base64 encoded secret value
-    #   required:
-    #     - env
-    #     - secret
-    # SecretBodyRegistryPayload:
-    #   description: Secret body registry payload
-    #   type: object
-    #   properties:
-    #     registry:
-    #       type: string
-    #       minLength: 1
-    #       description: Registry domain
-    #       example: ghcr.io
-    #       format: string
-    #     secret:
-    #       type: string
-    #       minLength: 1
-    #       description: Base64 encoded token
-    #   required:
-    #     - registry
-    #     - secret
     SecretBodyPatch:
       description: Secret body patch fields
       type: object
@@ -1430,10 +1348,8 @@ components:
           $ref: "#/components/schemas/SecretCreateType"
         payload:
           $ref: "#/components/schemas/SecretCreatePayload"
-        encryption:
-          type: string
-          description: Encryption entity
-          example: keys/dek/123
+        encryption: #resolve:true
+          $ref: '#/components/schemas/SecretBody/properties/encryption'
       required:
         - type
         - payload
@@ -1533,6 +1449,7 @@ components:
           type: string
           description: Reference to the secret to use
           example: "project_id/secret_id@secret_revision"
+          pattern: "^[0-9A-f-]{36}\\/[0-9A-f-]{36}\\@[0-9]+$"
       required:
         - name
         - reference
@@ -1560,12 +1477,14 @@ components:
           description: |
             CPU in 0.1 vCPU increments, for a whole vCPU specify 1024
             Must be in multiples of 128, with the same multiplier as memory
+            from the base
           example: 128
         memory:
           type: integer
           description: |
             Memory in 128 MB increments, values are integer always in MB
             Must be in multiples of 128, with the same multiplier as CPU
+            from the base
           example: 128
       required:
         - cpu
@@ -1708,38 +1627,22 @@ components:
       description: Function create body
       type: object
       properties:
-        project_id:
-          type: string
-          description: ID of the project this function belongs to
-          format: uuid
-          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
-        version:
-          type: string
-          enum: ['1.0.0']
-          description: Function spec version
-          example: '1.0.0'
-        name:
-          type: string
-          description: Name of the function
-          minLength: 1
-          example: my-function
-        description:
-          type: string
-          description: Description of what the function does
-          example: My function does this
-        image:
-          type: string
-          description: Path to container image
-          minLength: 1
-          example: docker.io/my-image:latest
+        project_id: #resolve:true
+          $ref: "#/components/schemas/Function/properties/project_id"
+        version: #resolve:true
+          $ref: "#/components/schemas/Function/properties/version"
+        name: #resolve:true
+          $ref: "#/components/schemas/Function/properties/name"
+        description: #resolve:true
+          $ref: "#/components/schemas/Function/properties/description"
+        image: #resolve:true
+          $ref: "#/components/schemas/Function/properties/image"
         type:
           $ref: "#/components/schemas/FunctionType"
         size:
           $ref: "#/components/schemas/FunctionSize"
-        port:
-          type: integer
-          description: Port the application runs on
-          example: 8080
+        port: #resolve:true
+          $ref: "#/components/schemas/Function/properties/port"
         routes:
           type: array
           description: The public route/path to this function, only applicable to http type functions
@@ -2074,29 +1977,12 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/SecretBody"
-          examples:
-            secret-registry-create:
-              value:
-                name: FIRST_API
-                type: registry
-                payload:
-                  registry: "ghcr.io"
-                  secret: "VGhpcyBzaG91bGQgYmUgYSBzZWN1cmUgc2VjcmV0LCBnZW5lcmF0ZSBsZW5ndGh5IGNyZWRlbnRpYWxzCg=="
-            secret-certificate-create:
-              value:
-                name: FIRST_API
-                type: certificate
-                payload:
-                  domain: "my-app.com"
-                  secret: "VGhpcyB3b3VsZCBiZSB5b3VyIGNlcnRpZmljYXRlCg=="
-            secret-environment-create:
-              value:
-                name: FIRST_API
-                type: environment
-                payload:
-                  env: "MY_FIRST_SECRET"
-                  secret: "bXkgc2VjcmV0IHZhbHVlCg=="
-      description: Create/Update any field
+      description: |
+        Create/Update any field
+
+        The example generated may only be for one
+        of the secret types, look towards the payload section of the schema
+        for further fields, values and examples.
       required: true
 
     SecretBodyPatch:
@@ -2221,6 +2107,16 @@ components:
         format: uuid
         example: 069614e-adc8-47cb-a69c-decf9c5f90fc
       description: Function revision ID reference
+    # generic filters
+    filter_name:
+      in: query
+      name: f_name
+      schema:
+        type: string
+        example: my-proj*
+      description: |
+        Filter resource on name, if the value ends in an asterix it will be
+        treated as a partial search otherwise, it'll be an exact match
 
   securitySchemes:
     token:
