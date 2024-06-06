@@ -1176,6 +1176,7 @@ components:
           description: Secret name
           minLength: 1
           pattern: "^[A-Z_]+$"
+          example: MY_SECRET
         type:
           $ref: "#/components/schemas/SecretCreateType"
         payload:
@@ -1241,10 +1242,11 @@ components:
       properties:
         registry:
           type: string
-          minLength: 1
-          description: Registry domain
+          description: |
+            Private registry domain/location, when using the private docker hub registry sepcify `docker.io`
+            > Without http scheme
           example: ghcr.io
-          format: string
+          format: hostname
       required:
         - registry
 
@@ -1306,11 +1308,8 @@ components:
       description: "Encrypted private container registry, `type: registry`"
       type: object
       properties:
-        registry:
-          type: string
-          format: url
-          description: Url to private container repository (for docker registry use docker.io)
-          example: ghcr.io
+        registry: #resolve:true
+          $ref: "#/components/schemas/SecretMetaResponseRegistryPayload/properties/registry"
         registry_value:
           type: string
           format: base64
