@@ -2121,7 +2121,7 @@ components:
   securitySchemes:
     token:
       type: http
-      scheme: Bearer
+      scheme: bearer
     cookie:
       type: apiKey
       in: cookie
