@@ -709,13 +709,15 @@ paths:
   # providers
   '/providers':
     get:
+      parameters:
+        - $ref: '#/components/parameters/pagination_page'
       summary: Get available providers
       tags:
         - providers
       responses:
         '200':
-          $ref: '#/components/responses/Provider'
-      operationId: providers-get
+          $ref: '#/components/responses/ListProvider'
+      operationId: providers-list
       description: Retrieve a list of all providers with their respective deployed regions and cities.
       security:
         - token: []
@@ -1695,45 +1697,64 @@ components:
 
     Provider:
       description: List of providers
-      type: array
-      items:
-        type: object
-        properties:
-          id:
-            type: string
-            format: uuid
-            example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
-          name:
-            type: string
-            minLength: 1
-            description: Name of provider
-            example: AWS
-          locations:
-            type: object
-            description: Locations at varying levels this provider operates within
-            properties:
-              continents:
-                type: array
-                items:
-                  type: string
-                  description: Deployment continent
-                  example: EU
-              countries:
-                type: array
-                items:
-                  type: string
-                  description: Deployment country
-                  example: GB
-              cities:
-                type: array
-                items:
-                  type: string
-                  description: Deployment city
-                  example: London
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        name:
+          type: string
+          minLength: 1
+          description: Name of provider
+          example: AWS
+        locations:
+          type: object
+          description: Locations at varying levels this provider operates within
+          properties:
+            continents:
+              type: array
+              items:
+                type: string
+                description: Deployment continent
+                example: EU
+            countries:
+              type: array
+              items:
+                type: string
+                description: Deployment country
+                example: GB
+            cities:
+              type: array
+              items:
+                type: string
+                description: Deployment city
+                example: London
+          required:
+            - continents
+            - countries
+            - cities
       required:
         - id
         - name
         - locations
+
+    ListProviderResponse:
+      type: object
+      description: "List of providers"
+      properties:
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+          links:
+            $ref: "#/components/schemas/PaginationLinks"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Provider"
+      required:
+        - meta
+        - data
+
 
   # responses
   responses:
@@ -1915,12 +1936,12 @@ components:
           schema:
             $ref: '#/components/schemas/Function'
 
-    Provider:
+    ListProvider:
       description: List providers
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Provider'
+            $ref: '#/components/schemas/ListProviderResponse'
 
   # request bodies
   requestBodies:
