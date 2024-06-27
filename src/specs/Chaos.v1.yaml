@@ -794,7 +794,7 @@ components:
     HostVerificationStatus:
       description: Host verification status
       type: string
-      enum: [pending, completed, failed]
+      enum: [pending, already_verified, completed, failed]
       example: pending
 
     Host:
