@@ -602,11 +602,11 @@ paths:
         '200':
           $ref: '#/components/responses/ListFunction'
       operationId: projects-functions-list
-    post:
+
+  '/functions':
+     post:
       summary: Create function
-      operationId: projects-functions-create
-      parameters:
-        - $ref: "#/components/parameters/project_id"
+      operationId: functions-create
       security:
         - token: []
         - cookie: []
