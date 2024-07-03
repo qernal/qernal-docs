@@ -7,6 +7,9 @@ on:
       - main
       - develop
 
+permissions:
+  packages: write
+
 jobs:
   # validate docs
   lint:
