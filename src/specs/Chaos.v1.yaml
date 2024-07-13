@@ -816,7 +816,7 @@ components:
           type: string
           description: The secret reference to the certificate
           pattern: '^projects\:(?<project_id>[a-z0-9-]{36})/(?<secret_name>[A-Z0-9_]+\\@[0-9]+)$'
-          example: "projects:secrets/MY_CERT"
+          example: "projects:d8f6ede4-e3a4-414d-b6c3-b8a972773e56/MY_CERT"
         project_id:
           type: string
           description: Project ID this is attached to
@@ -1630,6 +1630,7 @@ components:
         - scaling
         - deployments
         - secrets
+        - compliance
 
     FunctionBody:
       description: Function create body
