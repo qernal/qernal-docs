@@ -2133,7 +2133,7 @@ components:
       schema:
         type: string
         format: uuid
-        example: 069614e-adc8-47cb-a69c-decf9c5f90fc
+        example: 1069614e-adc8-47cb-a69c-decf9c5f90fc
       description: Function revision ID reference
     # generic filters
     filter_name:
