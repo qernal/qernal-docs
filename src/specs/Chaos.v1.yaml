@@ -1686,6 +1686,7 @@ components:
         - scaling
         - deployments
         - secrets
+        - compliance
 
     ListFunction:
       type: object
