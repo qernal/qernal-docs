@@ -724,6 +724,61 @@ paths:
         - token: []
         - cookie: []
 
+  # logs
+  '/logs':
+    get:
+      parameters:
+        - $ref: '#/components/parameters/pagination_page'
+        - $ref: '#/components/parameters/filter_project'
+        - $ref: '#/components/parameters/filter_function'
+        - $ref: '#/components/parameters/filter_timestamps'
+        - $ref: '#/components/parameters/filter_query'
+        - $ref: '#/components/parameters/filter_log_type'
+      summary: Get logs
+      tags:
+        - logs
+      responses:
+        '200':
+          $ref: '#/components/responses/ListLog'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      operationId: logs-list
+      description: |
+        Retrieve logs for a specific project or function. Use the query parameter to search logs.
+
+        > Note: Logs are always returned in a descending order based on the timestamp.
+        > Note: A max size of 500 logs is returned per request (when using page[size]).
+      security:
+        - token: []
+        - cookie: []
+
+  # metrics
+  '/metrics/aggregations/{metric_type}':
+    get:
+      parameters:
+        - $ref: '#/components/parameters/metric_aggregation_type'
+        - $ref: '#/components/parameters/pagination_page'
+        - $ref: '#/components/parameters/filter_project'
+        - $ref: '#/components/parameters/filter_function'
+        - $ref: '#/components/parameters/filter_timestamps'
+        - $ref: '#/components/parameters/filter_histogram_interval'
+      summary: Get metrics
+      tags:
+        - metrics
+      responses:
+        '200':
+          $ref: '#/components/responses/MetricAggregation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      operationId: metrics-aggregations-list
+      description: |
+        Retrieve metrics for a specific project or function. Use the query parameter to request a metrics report.
+
+        > Note: Metrics are always returned in a descending order based on the timestamp.
+      security:
+        - token: []
+        - cookie: []
+
 components:
   # schemas
   schemas:
@@ -1748,6 +1803,70 @@ components:
         - name
         - locations
 
+    Log:
+      description: List of logs
+      type: object
+      properties:
+        container:
+          type: string
+          description: Container ID the log line is for
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        function:
+          type: string
+          description: Function ID the log line is for
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        project:
+          type: string
+          description: Project ID the log line is for
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        organisation:
+          type: string
+          description: Organisation ID the log line is for
+          format: uuid
+          example: 51687d2f-07b0-4260-8ecb-f5098305fdd4
+        group:
+          type: string
+          description: Group ID the log line is for
+          format: string
+          example: 450983055444
+        log:
+          description: Log item
+          type: object
+          properties:
+            stream:
+              type: string
+              enum: [stdout, stderr]
+              description: Which log stream
+              example: stdout
+            kind:
+              type: string
+              enum: [event, log]
+              description: If this was an event on the function or a log line
+              example: log
+            labels:
+              type: array
+              description: An array of labels
+              items:
+                type: string
+                description: Text label - may include provider or region it came from
+                example: aws
+            type:
+              type: string
+              enum: [info, error]
+              description: Log line type
+              example: error
+            line:
+              type: string
+              description: Log line
+              example: Application started successfully, listening on port 3000
+            timestamp:
+              type: string
+              description: The date/time that this log was generated
+              format: datetime
+              example: 2023-07-22T14:50:13Z20230722T145013Z
+
     ListProviderResponse:
       type: object
       description: "List of providers"
@@ -1764,6 +1883,181 @@ components:
         - meta
         - data
 
+    ListLogResponse:
+      type: object
+      description: "List of log"
+      properties:
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+          links:
+            $ref: "#/components/schemas/PaginationLinks"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Log"
+      required:
+        - meta
+        - data
+
+    MetricResourceAggregation:
+      description: Metric resource aggregation
+      type: object
+      properties:
+        resources:
+          description: Resource(s) aggregation
+          type: object
+          properties:
+            buckets:
+              description: Array of unqiue resources
+              type: array
+              items:
+                description: Histogram bucket
+                type: object
+                properties:
+                  doc_count:
+                    description: Number of documents in the bucket
+                    type: integer
+                    example: 33846
+                  histogram:
+                    description: Histogram of resource usage
+                    type: object
+                    properties:
+                      buckets:
+                        description: |
+                          Array of resource usage by interval
+
+                          > Note: A metric will have either a `counter` or `gauge` value
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            doc_count:
+                              description: Number of documents in the bucket
+                              type: integer
+                              example: 8173
+                            counter:
+                              description: Counter (monotonically incrementing)
+                              type: object
+                              properties:
+                                avg:
+                                  description: Average counter value
+                                  type: number
+                                  example: 401989004.45192075
+                                  nullable: true
+                                count:
+                                  description: Number of counter values
+                                  type: integer
+                                  example: 8174
+                                  nullable: true
+                                max:
+                                  description: Maximum counter value
+                                  type: number
+                                  example: 2850721300
+                                  nullable: true
+                                min:
+                                  description: Minimum counter value
+                                  type: number
+                                  example: 9922579
+                                  nullable: true
+                                sum:
+                                  description: Sum of counter values
+                                  type: number
+                                  example: 3285858122390
+                                  nullable: true
+                            gauge:
+                              description: Gauge (value at a point in time)
+                              type: object
+                              properties:
+                                avg:
+                                  description: Average gauge value
+                                  type: number
+                                  example: 2703633.5168236876
+                                  nullable: true
+                                count:
+                                  description: Number of gauge values
+                                  type: integer
+                                  example: 8173
+                                  nullable: true
+                                max:
+                                  description: Maximum gauge value
+                                  type: number
+                                  example: 360253860
+                                  nullable: true
+                                min:
+                                  description: Minimum gauge value
+                                  type: number
+                                  example: 1604225
+                                  nullable: true
+                                sum:
+                                  description: Sum of gauge values
+                                  type: number
+                                  example: 22096796733
+                            key:
+                              description: Histogram key (typically unix timestamp)
+                              type: number
+                              example: 1738108800000
+                            key_as_string:
+                              description: Histogram key as string/date-time
+                              type: string
+                              example: '2025-01-29T00:00:00Z'
+                  key:
+                    description: Metric key
+                    type: string
+                    example: cpu-usage
+            doc_count_error_upper_bound:
+              description: Upper bound of error in document count
+              type: integer
+              example: 0
+            sum_other_doc_count:
+              description: Sum of other document counts
+              type: integer
+              example: 0
+
+    MetricHttpAggregation:
+      description: Metric http aggregation
+      type: object
+      properties:
+        http_codes:
+          description: HTTP status code aggregation
+          type: object
+          properties:
+            buckets:
+              description: Array of unique http status codes
+              type: array
+              items:
+                description: HTTP status code bucket
+                type: object
+                properties:
+                  doc_count:
+                    description: Number of documents in the bucket
+                    type: integer
+                    example: 26
+                  histogram:
+                    description: Histogram of http status code usage
+                    type: object
+                    properties:
+                      buckets: #resolve:true
+                        $ref: "#/components/schemas/MetricResourceAggregation/properties/resources/properties/buckets"
+                  key:
+                    description: |
+                      HTTP status code, typical values will be;
+
+                      - http-2xx
+                      - http-3xx
+                      - http-4xx
+                      - http-5xx
+
+                      > Note: the 'xx' is intentional and literal, all status codes within that range will be grouped
+                    type: string
+                    example: http-2xx
+            doc_count_error_upper_bound:
+              description: Upper bound of error in document count
+              type: integer
+              example: 0
+            sum_other_doc_count:
+              description: Sum of other document counts
+              type: integer
+              example: 0
 
   # responses
   responses:
@@ -1952,6 +2246,22 @@ components:
           schema:
             $ref: '#/components/schemas/ListProviderResponse'
 
+    ListLog:
+      description: List logs
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ListLogResponse'
+
+    MetricAggregation:
+      description: Metric aggregation
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/MetricResourceAggregation'
+              - $ref: '#/components/schemas/MetricHttpAggregation'
+
   # request bodies
   requestBodies:
     HostBody:
@@ -2136,7 +2446,23 @@ components:
         format: uuid
         example: 1069614e-adc8-47cb-a69c-decf9c5f90fc
       description: Function revision ID reference
-    # generic filters
+    # metrics
+    metric_aggregation_type:
+      name: metric_type
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [httprequests, resourcestats]
+        example: httprequests
+      description: |
+        Metric aggregation type, types can be used with either a project or a function filter.
+
+        - httprequests: Aggregated HTTP requests
+        - resourcestats: Aggregated resource stats (such as CPU, Memory and Network)
+
+        > Note: aggregations cannot return more than 300 data points
+    # generic in query filters
     filter_name:
       in: query
       name: f_name
@@ -2146,6 +2472,60 @@ components:
       description: |
         Filter resource on name, if the value ends in an asterix it will be
         treated as a partial search otherwise, it'll be an exact match
+    filter_project:
+      in: query
+      name: f_project
+      description: Project uuid reference
+      schema:
+        type: string
+        format: uuid
+        example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
+    filter_function:
+      in: query
+      name: f_function
+      description: Function uuid reference
+      schema:
+        type: string
+        format: uuid
+        example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
+    filter_timestamps:
+      in: query
+      name: f_timestamps
+      schema:
+        type: object
+        properties:
+          after: # qw: start_timestamp
+            type: string
+            example: 2022-05-06T18:05:57.723262Z
+            description: Restrict to after this timestamp
+          before: # qw: end_timestamp
+            type: string
+            example: 2023-05-06T18:05:57.723262Z
+            description: Resitrct to before this timestamp
+      style: deepObject
+      explode: true
+      description: Timestamp restriction for query
+    filter_query:
+      in: query
+      name: f_query
+      description: Text query string
+      schema:
+        type: string
+        example: bootstrap
+    filter_log_type:
+      in: query
+      name: f_log_type
+      description: Type of log
+      schema: #resolve:true
+        $ref: "#/components/schemas/Log/properties/log/properties/type"
+    filter_histogram_interval:
+      in: query
+      name: f_histogram_interval
+      description: Histogram interval
+      schema:
+        description: Interval in seconds
+        type: integer
+        example: 600
 
   securitySchemes:
     token:
@@ -2172,3 +2552,7 @@ tags:
     description: List of providers you can use to deploy functions into and their available locations - this includes any private providers attached to your organisation
   - name: hosts
     description: Hosts attached to the project so make functions routeable via the internet
+  - name: logs
+    description: Logs for functions
+  - name: metrics
+    description: Metrics and aggregations for functions and projects
