@@ -753,11 +753,10 @@ paths:
         - cookie: []
 
   # metrics
-  '/metrics/aggregations/{metric_type}':
+  '/metrics/aggregations/{metric_aggregation_type}':
     get:
       parameters:
         - $ref: '#/components/parameters/metric_aggregation_type'
-        - $ref: '#/components/parameters/pagination_page'
         - $ref: '#/components/parameters/filter_project'
         - $ref: '#/components/parameters/filter_function'
         - $ref: '#/components/parameters/filter_timestamps'
