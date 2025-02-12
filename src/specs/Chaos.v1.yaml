@@ -1993,8 +1993,7 @@ components:
                                   example: 22096796733
                             key:
                               description: Histogram key (typically unix timestamp)
-                              type: integer
-                              format: int64
+                              type: number
                               example: 1738108800000
                             key_as_string:
                               description: Histogram key as string/date-time
