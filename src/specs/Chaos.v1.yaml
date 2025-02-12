@@ -1993,7 +1993,8 @@ components:
                                   example: 22096796733
                             key:
                               description: Histogram key (typically unix timestamp)
-                              type: number
+                              type: integer
+                              format: int64
                               example: 1738108800000
                             key_as_string:
                               description: Histogram key as string/date-time
@@ -2036,7 +2037,7 @@ components:
                     type: object
                     properties:
                       buckets: #resolve:true
-                        $ref: "#/components/schemas/MetricResourceAggregation/properties/resources/properties/buckets"
+                        $ref: "#/components/schemas/MetricResourceAggregation/properties/resources/properties/buckets/items/properties/histogram/properties/buckets"
                   key:
                     description: |
                       HTTP status code, typical values will be;
