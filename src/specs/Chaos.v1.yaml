@@ -60,6 +60,195 @@ paths:
       operationId: users-quotas-get
       description: Get a specific quota for a user
 
+  # billing
+  "/billing/accounts":
+    get:
+      summary: List billing accounts
+      tags:
+        - billing
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ListBillingAccounts"
+        "401":
+          $ref: "#/components/responses/Unauthorised"
+      operationId: billing-accounts-list
+      description: List all billing accounts for this user, paginated
+    post:
+      summary: Create billing account
+      operationId: billing-accounts-create
+      responses:
+        "201":
+          $ref: "#/components/responses/BillingAccount"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorised"
+      description: Create a new billing account
+      requestBody:
+        $ref: "#/components/requestBodies/BillingAccountBody"
+      tags:
+        - billing
+      security:
+        - token: []
+        - cookie: []
+
+  "/billing/accounts/{billing_account_id}":
+    parameters:
+      - $ref: "#/components/parameters/billing_account_id"
+    get:
+      summary: Get billing account
+      tags:
+        - billing
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        "200":
+          $ref: "#/components/responses/BillingAccount"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+      operationId: billing-accounts-get
+      description: Get a specific billing account
+    put:
+      operationId: billing-accounts-update
+      summary: Update billing account
+      description: Update the details of a specific billing account.
+      tags:
+        - billing
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        "200":
+          $ref: "#/components/responses/BillingAccount"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+      requestBody:
+        $ref: "#/components/requestBodies/BillingAccountBody"
+    delete:
+      operationId: billing-accounts-delete
+      summary: Delete billing account
+      description: Delete a specific billing account if it is no longer attached to any organizations or projects and has no outstanding balances or invoice payments.
+      tags:
+        - billing
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResourceDeleted"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+
+  "/billing/accounts/{billing_account_id}/payment-methods":
+    parameters:
+      - $ref: "#/components/parameters/billing_account_id"
+    get:
+      summary: List payment methods for a billing account
+      description: Retrieve a list of payment methods associated with a specific billing account.
+      tags:
+        - billing
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ListPaymentMethods"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+      operationId: accounts-payment-methods-list
+    post:
+      summary: Create a new payment method for a billing account
+      description: Create a new payment method associated with a specific billing account.
+      tags:
+        - billing
+      security:
+        - token: []
+        - cookie: []
+      requestBody:
+        $ref: "#/components/requestBodies/PaymentMethodBody"
+      responses:
+        "201":
+          $ref: "#/components/responses/PaymentMethodCreate"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+        "409":
+          $ref: "#/components/responses/ResourceConflict"
+      operationId: accounts-payment-methods-create
+
+  "/billing/payment-methods/{billing_payment_method_id}":
+    parameters:
+      - $ref: "#/components/parameters/billing_payment_method_id"
+    get:
+      summary: Retrieve metadata for a specific payment method
+      description: Get metadata (such as state, active, declined, cancelled, etc.) for a specific payment method.
+      tags:
+        - billing
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaymentMethod"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+      operationId: payment-methods-get
+    put:
+      summary: Update a specific payment method
+      description: Update the details of a specific payment method.
+      tags:
+        - billing
+      security:
+        - token: []
+        - cookie: []
+      requestBody:
+        $ref: "#/components/requestBodies/PaymentMethodBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/PaymentMethod"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+      operationId: payment-methods-update
+    delete:
+      summary: Delete a specific payment method
+      description: Remove a specific payment method entirely if there are no associated resources and no pending partial invoices.
+      tags:
+        - billing
+      security:
+        - token: []
+        - cookie: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResourceDeleted"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "403":
+          $ref: "#/components/responses/Unauthorised"
+      operationId: payment-methods-delete
+
   # organisations
   "/organisations":
     get:
@@ -2222,6 +2411,205 @@ components:
         - usage
         - type
 
+    # billing
+    ListBillingAccounts:
+      type: array
+      description: "List of billing accounts"
+      items:
+        $ref: "#/components/schemas/BillingAccount"
+
+    BillingAccount:
+      type: object
+      description: Billing account
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the billing account
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        user_id:
+          type: string
+          format: uuid
+          description: User ID associated with the billing account
+          example: "641adf03-0bd2-42e6-9166-cb57008d60eb"
+        name:
+          type: string
+          description: Name of the billing account
+          example: "Business Account"
+        state:
+          type: string
+          enum: [created, active, inactive, suspended, deleted]
+          description: Current state of the billing account - new accounts are created with state "created" until a card is added
+          example: "active"
+        balance:
+          type: number
+          format: float
+          description: Current balance of the billing account
+          example: 100.50
+        # TODO: reference date fields
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the billing account was created
+          example: "2023-01-01T00:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when the billing account was last updated
+          example: "2023-01-01T00:00:00Z"
+
+    BillingAccountBody:
+      description: Billing account body
+      type: object
+      properties:
+        # TODO: change fields to match Midas
+        name: #resolve:true
+          $ref: '#/components/schemas/BillingAccount/properties/name'
+      required:
+        - name
+
+    PaymentMethod:
+      type: object
+      description: Payment method
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the payment method
+          example: "71afba61-e7b4-4072-a2b4-099c8c2cfcba"
+        billing_account: #resolve:true
+          $ref: '#/components/schemas/BillingAccount/properties/id'
+        name:
+          type: string
+          description: Name on the payment method
+          example: "Amex Business Gold"
+        state:
+          type: string
+          enum: [active, inactive, suspended, deleted]
+          description: Current state of the payment method
+          example: "active"
+        address:
+          type: object
+          description: Billing address associated with the payment method
+          properties:
+            title:
+              type: string
+              description: Title of the cardholder
+              example: "Mr"
+            first_name:
+              type: string
+              description: First name of the cardholder
+              example: "John"
+            last_name:
+              type: string
+              description: Last name of the cardholder
+              example: "Doe"
+            organisation:
+              type: string
+              description: Organisation name, if applicable
+              example: "Acme Corp"
+            address_line1:
+              type: string
+              description: First line of the address
+              example: "123 Main St"
+            address_line2:
+              type: string
+              description: Second line of the address, if applicable
+              example: "Suite 400"
+            city:
+              type: string
+              description: City of the address
+              example: "Metropolis"
+            county:
+              type: string
+              description: County or state of the address
+              example: "CA"
+            postal_code:
+              type: string
+              description: Postal or ZIP code of the address
+              example:
+                - "10001"
+                - "SW1A 1AA"
+            country:
+              type: string
+              description: Country of the address (ISO 3166-1 alpha-2 code)
+              example: "US"
+            phone_number:
+              type: string
+              description: Contact phone number associated with the payment method
+              example: "+1-555-123-4567"
+
+    PaymentMethodBody:
+      description: Payment method body
+      type: object
+      properties:
+        name: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/name'
+        # address fields
+        title: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/title'
+        first_name: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/first_name'
+        last_name: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/last_name'
+        organisation: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/organisation'
+        address_line1: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/address_line1'
+        address_line2: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/address_line2'
+        city: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/city'
+        county: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/county'
+        postal_code: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/postal_code'
+        country: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/country'
+        phone_number: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/address/properties/phone_number'
+
+    PaymentMethodCreate:
+      description: Payment method create response
+      type: object
+      properties:
+        payment_method_id:  #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/id'
+        billing_account_id: #resolve:true
+          $ref: '#/components/schemas/BillingAccount/properties/id'
+        name: #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/name'
+        description:
+          type: string
+          description: Description of this order (e.g. payment authorisation)
+        state:  #resolve:true
+          $ref: '#/components/schemas/PaymentMethod/properties/state'
+        links:
+          type: object
+          description: Links related to the payment method, such as checkout URL
+          properties:
+            checkout:
+              type: string
+              format: uri
+              description: URL for the payment method checkout
+              example: "https://checkout.paymentprovider.com/pay"
+            created_at:
+              type: string
+              format: date-time
+              description: Timestamp when the checkout link was created
+              example: "2023-01-01T00:00:00Z"
+            expires_at:
+              type: string
+              format: date-time
+              description: Timestamp when the checkout link expires
+              example: "2023-01-02T00:00:00Z"
+
+    ListPaymentMethods:
+      type: array
+      description: "List of payment methods"
+      items:
+        $ref: "#/components/schemas/PaymentMethod"
+
   # responses
   responses:
     NoContent:
@@ -2433,8 +2821,45 @@ components:
           schema:
             $ref: '#/components/schemas/ListQuotas'
 
+    # billing
+    ListBillingAccounts:
+      description: List billing accounts
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ListBillingAccounts'
+
+    BillingAccount:
+      description: Get billing account
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BillingAccount'
+
+    ListPaymentMethods:
+      description: List payment methods
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ListPaymentMethods'
+
+    PaymentMethod:
+      description: Get payment method
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentMethod'
+
+    PaymentMethodCreate:
+      description: Create payment method
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentMethodCreate'
+
   # request bodies
   requestBodies:
+    # hosts
     HostBody:
       content:
         application/json:
@@ -2449,6 +2874,7 @@ components:
             $ref: "#/components/schemas/HostBodyPatch"
       required: true
 
+    # tokens
     AuthTokenBody:
       content:
         application/json:
@@ -2463,12 +2889,15 @@ components:
             $ref: "#/components/schemas/AuthTokenPatch"
       required: true
 
+    # organisations
     OrganisationBody:
       description: Create/Update any field
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/OrganisationBody"
+
+    # projects
     ProjectBody:
       content:
         application/json:
@@ -2482,6 +2911,7 @@ components:
             $ref: "#/components/schemas/ProjectBodyPatch"
       description: Update any field
 
+    # secrets
     SecretBody:
       content:
         application/json:
@@ -2503,6 +2933,7 @@ components:
       description: Update any field
       required: true
 
+    # compute functions
     FunctionBody:
       description: Create/Update any field
       content:
@@ -2517,6 +2948,23 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Function'
+      required: true
+
+    # billing
+    BillingAccountBody:
+      description: Create/Update any field
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BillingAccountBody"
+      required: true
+
+    PaymentMethodBody:
+      description: Create/Update any field
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PaymentMethodBody"
       required: true
 
   # parameters
@@ -2652,6 +3100,25 @@ components:
         type: string
         description: Specific quota to filter by
         example: projects_secrets
+    # billing
+    billing_account_id:
+      name: billing_account_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
+      description: Billing account ID reference
+    billing_payment_method_id:
+      name: billing_payment_method_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
+      description: Payment method ID reference
     # generic in query filters
     filter_name:
       in: query
@@ -2730,6 +3197,10 @@ components:
 tags:
   - name: users
     description: User operations
+  - name: billing
+    description: Billing operations for accounts and payment methods
+  - name: quotas
+    description: Quota limits and usage
   - name: projects
     description: Project operations, projects belong to an organisation
   - name: organisations
