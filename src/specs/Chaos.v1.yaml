@@ -1440,6 +1440,12 @@ components:
           format: uuid
           minLength: 1
           example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
+        billing_account_id:
+          type: string
+          description: Billing account id
+          format: uuid
+          minLength: 1
+          example: 3069614e-adc8-47cb-a69c-decf9c5f90fc
         name:
           type: string
           description: Organisation name
@@ -1459,8 +1465,19 @@ components:
       properties:
         name: #resolve:true
           $ref: '#/components/schemas/Organisation/properties/name'
+        billing_account_id: #resolve:true
+          $ref: '#/components/schemas/Organisation/properties/billing_account_id'
       required:
         - name
+        - billing_account_id
+    OrganisationBodyPatch:
+      description: Organisation patch fields
+      type: object
+      properties:
+        name: #resolve:true
+          $ref: '#/components/schemas/Organisation/properties/name'
+        billing_account_id: #resolve:true
+          $ref: '#/components/schemas/Organisation/properties/billing_account_id'
 
     Project:
       description: Project response/object
