@@ -1539,8 +1539,8 @@ components:
           type: string
           description: Secret name
           minLength: 1
-          pattern: "^[A-Z_]+$"
-          example: MY_SECRET
+          pattern: "^[A-Z0-9_]+$"
+          example: MY_SECRET_25
         type:
           $ref: "#/components/schemas/SecretType"
         payload:
@@ -1577,7 +1577,7 @@ components:
           type: string
           minLength: 1
           description: Public TLS certificate
-          example: "<x509 content>"
+          example: "<x509 content in PEM format>"
           format: string
       required:
         - certificate
@@ -1676,8 +1676,8 @@ components:
         encryption:
           type: string
           description: Encryption entity
-          example: keys/dek/123
-          pattern: "^keys\\/dek\\/[0-9]+$"
+          example: keys/DEK/123
+          pattern: "^keys\\/DEK\\/[0-9]+$"
       required:
         - name
         - type
@@ -1688,14 +1688,11 @@ components:
       description: Secret body patch fields
       type: object
       properties:
-        type:
-          $ref: "#/components/schemas/SecretBodyType"
         payload:
           $ref: "#/components/schemas/SecretBodyPayload"
         encryption: #resolve:true
           $ref: '#/components/schemas/SecretBody/properties/encryption'
       required:
-        - type
         - payload
         - encryption
 
